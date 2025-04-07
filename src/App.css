@@ -36,3 +36,84 @@
     transform: rotate(360deg);
   }
 }
+
+nav {
+  padding: 1rem;
+  background-color: #f0f0f0;
+}
+
+nav a {
+  margin-right: 1rem;
+  text-decoration: none;
+  color: #282c34;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+nav a:hover {
+  background-color: #282c34;
+  color: white;
+}
+
+.header {
+  @apply bg-white shadow-md;
+}
+
+.header-container {
+  @apply container mx-auto px-4 py-3 flex items-center justify-between;
+}
+
+.header-nav ul {
+  @apply flex space-x-6;
+}
+
+.header-nav a {
+  @apply text-gray-600 hover:text-primary transition-colors;
+}
+
+.user-actions {
+  @apply flex items-center space-x-4;
+}
+
+.language-btn,
+.currency-btn,
+.login-btn {
+  @apply px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-50;
+}
+
+.mobile-menu-btn {
+  @apply hidden;
+}
+
+@media (max-width: 768px) {
+  .header-nav {
+    @apply hidden;
+  }
+  
+  .header-nav.active {
+    @apply block absolute top-16 left-0 w-full bg-white shadow-md;
+  }
+
+  .header-nav ul {
+    @apply flex-col space-x-0 p-4;
+  }
+
+  .header-nav li {
+    @apply py-2;
+  }
+
+  .mobile-menu-btn {
+    @apply block;
+  }
+  /* App.css */
+.react-select__control {
+  @apply p-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 shadow-none;
+}
+.react-select__menu {
+  @apply text-sm z-50;
+}
+.react-select__option {
+  @apply p-2 hover:bg-blue-100 cursor-pointer;
+}
+
+}
