@@ -30,10 +30,30 @@ const TrainBookingForm = () => {
     setDeparture(destination);
     setDestination(temp);
   };
+  const [formData, setFormData] = useState({
+    departure: 'Đà Nẵng',
+    date: '',
+    passengers: '1 người lớn',
+    destination: 'Đà Nẵng',
+    roundTrip: false
+  });
 
+  const handleChange = (e: { target: { name: any; value: any; type: any; checked: any; }; }) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    // Xử lý submit form ở đây
+  };
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-12">
-      <div className="container mx-auto px-4">
+    <div className=" bg-[length:100%_auto] bg-no-repeat bg-[url(https://easycdn.blob.core.windows.net/images/hero-images/vn-05.jpg)] from-blue-600 to-indigo-600 text-white py-12">
+      <div className="container  max-w-[1300px] mx-auto px-4">
         <h1 className="text-4xl font-bold mb-6 text-center">Đặt vé tàu hỏa</h1>
 
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">
@@ -44,7 +64,7 @@ const TrainBookingForm = () => {
 
           {/* Form */}
           <div className="p-6 bg-gray-50">
-            <div className="grid md:grid-cols-3 gap-6 mb-6">
+            <div className="grid md:grid-cols-3 gap-6 mb-6 ">
               <div>
                 <label className="block text-gray-700 mb-2">Điểm đi</label>
                 <Select

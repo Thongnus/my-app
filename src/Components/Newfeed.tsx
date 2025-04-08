@@ -27,7 +27,7 @@ const Newfeed = () => {
       <h2 className="text-xl font-semibold mb-2">Transport Operators' Offers & News</h2>
       <p className="text-sm text-gray-500 mb-6">Don’t miss out on these incredible deals - book now before they're gone!</p>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-x-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 overflow-x-auto">
         {promotions.map((promo, index) => (
           <div key={index} className="bg-yellow-300 rounded-lg shadow-md p-4 flex flex-col justify-between">
             <img

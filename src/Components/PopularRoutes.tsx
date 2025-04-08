@@ -27,16 +27,72 @@ const PopularRoutes: React.FC = () => {
       price: 375000,
       url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
     },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
+    {
+      departure: "Hà Nội",
+      arrival: "Lào Cai",
+      duration: "7h45p", 
+      trainNumber: "SP3",
+      price: 375000,
+      url: "https://www.ivivu.com/ve-tau/tim-kiem-chuyen-di?departPlaceCode=HNO&returnPlaceCode=LCA"
+    },
     // Add more routes as needed
   ];
 
   return (
-    <div className="py-8">
-      <div className="flex gap-6 flex-wrap">
+    <div className=" py-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {routes.map((route, index) => (
           <div 
             key={index}
-            className="card w-1/3 h-[127px] max-w-[364px] bg-white p-4 rounded-lg shadow-lg"
+            className="car-2/4 h-[127px] max-w-[364px] bg-white p-4 rounded-lg shadow-lg"
             itemScope
             itemType="https://schema.org/TrainTrip"
           >

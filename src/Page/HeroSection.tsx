@@ -12,9 +12,9 @@ import {
   FaSearch,
   FaSearchMinus
 } from 'react-icons/fa';
-import PopularRoutes from './PopularRoutes';
-import Newfeed from './Newfeed';
-import TrainBookingForm from './TrainBookingForm';
+import PopularRoutes from '../Components/PopularRoutes';
+import Newfeed from '../Components/Newfeed';
+import TrainBookingForm from '../Components/TrainBookingForm';
 
 const IconTrain = FaTrain as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconBus = FaBus as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -55,18 +55,18 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-      <div className="text-[#3f3b3b] font-helvetica pt-[24px] pl-[15px] pr-[15px] pb-[24px]">
-        <h2 className="text-[20px] mb-[6px] font-semibold">Bản đồ tuyến đường sắt Việt Nam</h2>
-        <h3 className="col-xs-12 no-padding text-left sub-title-internation mb-[16px] text-[16px]">Xem thông tin chi tiết về các tuyến tàu hỏa, lịch trình và điểm dừng</h3>
-        <div>
-          <img alt="ivivu" className="w-full h-full" src="https://res.ivivu.com/train/images/banner/ivivu_ban_do_duong_sat.webp" />
+      <div className="  text-center text-[#3f3b3b] font-helvetica pt-[24px] pl-[15px] pr-[15px] pb-[24px] p-[100px]  ">
+        <h2 className="text-[36px] mb-[6px] font-semibold pt-[0px]">Bản đồ tuyến đường sắt Việt Nam</h2>
+        <h3 className=" col-xs-12 no-padding  sub-title-internation mb-[24px] text-[18px]">Xem thông tin chi tiết về các tuyến tàu hỏa, lịch trình và điểm dừng</h3>
+        <div className='bg-gray-100'>
+          <img alt="ivivu" className=" mx-auto w-[60%] " src="https://res.ivivu.com/train/images/banner/ivivu_ban_do_duong_sat.webp" />
         </div>
-        <div className="bg-white pt-8"></div>
-        <div className="container mx-auto px-4"></div>
-        <h2 className="text-2xl font-bold mb-6">Các hành trình tàu hỏa phổ biến</h2>
+        <div className=" bg-white pt-8"></div>
+        <div className="container mx-auto px-4 "></div>
+        <h2 className=" text-2xl font-bold mb-6 ">Các hành trình tàu hỏa phổ biến</h2>
         <h3 className="text-lg mb-6">Khám phá những tuyến đường được yêu thích nhất và đặt vé ngay với giá ưu đãi!</h3>
       </div>
-      <div className="container mx-auto px-4">
+      <div className=" container mx-auto px-4">
         <PopularRoutes />
       </div>
       <div className="bg-gray-100 py-8">
