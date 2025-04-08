@@ -15,7 +15,7 @@ const TripTabs = ({
   const [activeTab, setActiveTab] = useState('depart');
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-6">
+    <div  className="w-[76%]  mx-auto px-4 py-6">
       <div className="flex rounded-xl overflow-hidden shadow-md">
         {/* Tab: Chiều đi */}
         <div
