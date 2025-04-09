@@ -9,6 +9,8 @@ import Breadcrumb from './Components/BreadCrumb';
 import TripTabs from './Components/TripTabs';
 import TrainBookingForm from './Components/TrainBookingForm';
 import TrainSearchResults from './Components/TrainSearchResults';
+import Titlelogin from './Components/login/Titlelogin';
+import LoginSignup from './Components/login/Titlelogin';
 
 
 const App: React.FC = () => {
@@ -20,11 +22,13 @@ const App: React.FC = () => {
     <>
    {/* <Layout/> */}
    <Header/>
-      <BookingSearch/>
+   <LoginSignup/>
+   {/* <TrainBookingForm/> */}
+      {/* <BookingSearch/>
       <Breadcrumb  from={from} fromCode={fromCode} to={to} toCode={toCode} />
       <TripTabs/>
       <TrainSearchResults />
-      <Footer/>
+    // <Footer/> */}
      </>
   );
 };

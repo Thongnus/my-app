@@ -20,7 +20,7 @@ const LayoutSearch: React.FC = () => {
    {/* <Layout/> */}
    <Header/>
       <BookingSearch/>
-      <Breadcrumb  from={from} fromCode={fromCode} to={to} toCode={toCode} />
+     
       <TripTabs/>
       <TrainSearchResults/>
      </>
