@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom"; // Thêm Link từ react-router-dom
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
@@ -7,17 +8,17 @@ export default function Header() {
   const [currency, setCurrency] = useState("VND");
 
   return (
-    <div className="bg-white border-b shadow-sm ">
+    <div className="bg-white border-b shadow-sm">
       <div className="container mx-auto px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <a href="/vi-vn">
+          <Link to="/">
             <img
               src="https://easycdn.blob.core.windows.net/images/easybook-logo-v3.png"
               alt="Easybook Logo"
               className="h-8"
             />
-          </a>
-          <a href="/vi-vn">
+          </Link>
+          <Link to="/">
             <img
               src="/images/sonphat/Sonphat-logo-full.png"
               alt="Sonphat Logo"
@@ -28,7 +29,7 @@ export default function Header() {
               alt="Sonphat Logo"
               className="block sm:hidden h-8"
             />
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -57,22 +58,22 @@ export default function Header() {
                 <div className="py-1">
                   <Menu.Item>
                     {({ active }) => (
-                      <a
-                        href="/vi-vn/account/login"
-                        className={`$${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                      <Link
+                        to="/login"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
                       >
                         Đăng Nhập
-                      </a>
+                      </Link>
                     )}
                   </Menu.Item>
                   <Menu.Item>
                     {({ active }) => (
-                      <a
-                        href="/vi-vn/account/register"
-                        className={`$${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                      <Link
+                        to="/signup"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
                       >
                         Đăng Ký
-                      </a>
+                      </Link>
                     )}
                   </Menu.Item>
                 </div>
@@ -80,9 +81,9 @@ export default function Header() {
             </Transition>
           </Menu>
 
-          <a href="/vi-vn/recentsearch" className="text-sm hover:underline">
+          <Link to="/recentsearch" className="text-sm hover:underline">
             Tìm kiếm gần đây
-          </a>
+          </Link>
 
           <Menu as="div" className="relative inline-block text-left">
             <Menu.Button className="inline-flex justify-center items-center gap-1 text-sm font-medium text-gray-700">
@@ -104,19 +105,34 @@ export default function Header() {
               <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="py-1">
                   <Menu.Item>
-                    <a href="/en-sg" className="block px-4 py-2 text-sm">
-                      Singapore
-                    </a>
+                    {({ active }) => (
+                      <Link
+                        to="/en-sg"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                      >
+                        Singapore
+                      </Link>
+                    )}
                   </Menu.Item>
                   <Menu.Item>
-                    <a href="/vi-vn" className="block px-4 py-2 text-sm">
-                      Việt Nam
-                    </a>
+                    {({ active }) => (
+                      <Link
+                        to="/vi-vn"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                      >
+                        Việt Nam
+                      </Link>
+                    )}
                   </Menu.Item>
                   <Menu.Item>
-                    <a href="/th-th" className="block px-4 py-2 text-sm">
-                      Thái Lan
-                    </a>
+                    {({ active }) => (
+                      <Link
+                        to="/th-th"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                      >
+                        Thái Lan
+                      </Link>
+                    )}
                   </Menu.Item>
                 </div>
               </Menu.Items>
@@ -138,14 +154,24 @@ export default function Header() {
               <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="py-1">
                   <Menu.Item>
-                    <a href="#" onClick={() => setCurrency("USD")} className="block px-4 py-2 text-sm">
-                      USD - Đô la Mỹ
-                    </a>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setCurrency("USD")}
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                      >
+                        USD - Đô la Mỹ
+                      </button>
+                    )}
                   </Menu.Item>
                   <Menu.Item>
-                    <a href="#" onClick={() => setCurrency("VND")} className="block px-4 py-2 text-sm">
-                      VND - Đồng Việt Nam
-                    </a>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setCurrency("VND")}
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                      >
+                        VND - Đồng Việt Nam
+                      </button>
+                    )}
                   </Menu.Item>
                 </div>
               </Menu.Items>
@@ -167,23 +193,33 @@ export default function Header() {
               <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="py-1">
                   <Menu.Item>
-                    <a href="#" onClick={() => setLanguage("Tiếng Việt")} className="block px-4 py-2 text-sm">
-                      Tiếng Việt
-                    </a>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setLanguage("Tiếng Việt")}
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                      >
+                        Tiếng Việt
+                      </button>
+                    )}
                   </Menu.Item>
                   <Menu.Item>
-                    <a href="#" onClick={() => setLanguage("English")} className="block px-4 py-2 text-sm">
-                      English
-                    </a>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setLanguage("English")}
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700 w-full text-left`}
+                      >
+                        English
+                      </button>
+                    )}
                   </Menu.Item>
                 </div>
               </Menu.Items>
             </Transition>
           </Menu>
 
-          <a href="/vi-vn/contact" className="text-sm hover:underline">
+          <Link to="/contact" className="text-sm hover:underline">
             Liên Hệ
-          </a>
+          </Link>
         </div>
       </div>
     </div>

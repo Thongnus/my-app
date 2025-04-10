@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import './App.css';
 import { Routes, Route, Link } from 'react-router-dom';
-import Header from './Components/Header';
-import Footer from './Components/Footer';
-import Layout from './Page/Layout';
+
 import BookingSearch from './Components/BookingSearch';
 import Breadcrumb from './Components/BreadCrumb';
 import TripTabs from './Components/TripTabs';
 import TrainBookingForm from './Components/TrainBookingForm';
 import TrainSearchResults from './Components/TrainSearchResults';
-import Titlelogin from './Components/login/Titlelogin';
-import LoginSignup from './Components/login/Titlelogin';
+import Footer from './Components/Footer';
+import Layout from './pages/Layout';
+import Header from './Components/Header';
+import { LoginForm, SignupForm } from './Components/login/LoginSignup';
+import LayoutSearch from './pages/LayoutSearch';
+
+
 
 
 const App: React.FC = () => {
@@ -22,7 +25,15 @@ const App: React.FC = () => {
     <>
    {/* <Layout/> */}
    <Header/>
-   <LoginSignup/>
+   <Routes>
+                <Route path="/" element={<Layout />} />
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/signup" element={<SignupForm />} />
+                <Route path="/train-booking" element={<Layout />} />
+                <Route path="/train-search-results" element={<LayoutSearch />} />
+            </Routes>
+   {/* <Layout/> */}
+   <Footer/>
    {/* <TrainBookingForm/> */}
       {/* <BookingSearch/>
       <Breadcrumb  from={from} fromCode={fromCode} to={to} toCode={toCode} />
