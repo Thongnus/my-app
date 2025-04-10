@@ -12,7 +12,7 @@ const CFaEdit = FaEdit as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaSlidersH = FaSlidersH as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaCaretDown = FaCaretDown as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaCaretUp = FaCaretUp as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-
+// Type definitions
 interface Trip {
     id: string;
     departureTime: string;
@@ -42,36 +42,279 @@ interface Trip {
     fromLatitude?: number;
     fromLongitude?: number;
 }
+
+type TimeFilter = { morning: boolean; afternoon: boolean; evening: boolean; all: boolean };
+type OperatorFilter = { livitrans: boolean; newLivitrans: boolean; lotusTrain: boolean; all: boolean };
+type FilterTypes = {
+    time: TimeFilter;
+    operator: OperatorFilter;
+    amenities: Record<string, boolean>;
+    pickup: Record<string, boolean>;
+    dropoff: Record<string, boolean>;
+};
+
+// FilterSidebar Component
+const FilterSidebar: React.FC<{
+    filters: FilterTypes;
+    setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>;
+    showFilters: boolean;
+    setShowFilters: React.Dispatch<React.SetStateAction<boolean>>;
+    resetFilters: () => void;
+}> = ({ filters, setFilters, showFilters, setShowFilters, resetFilters }) => {
+    const handleFilterChange = (filterType: keyof FilterTypes, filterKey: string) => {
+        setFilters(prev => {
+            const newFilters = { ...prev };
+            if (filterType === 'time' || filterType === 'operator') {
+                const filter = newFilters[filterType] as TimeFilter | OperatorFilter;
+                if (filterKey === 'all') {
+                    Object.keys(filter).forEach(key => {
+                        (filter as Record<string, boolean>)[key] = key === 'all';
+                    });
+                } else {
+                    (filter as Record<string, boolean>)[filterKey] = !(filter as Record<string, boolean>)[filterKey];
+                    filter.all = false;
+                }
+            } else {
+                (newFilters[filterType] as Record<string, boolean>)[filterKey] = !(newFilters[filterType] as Record<string, boolean>)[filterKey];
+            }
+            return newFilters;
+        });
+    };
+
+    return (
+        <div className="w-full md:w-1/4">
+            <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="md:hidden mb-4">
+                    <button onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded">
+                        <CFaSlidersH /> <span>Lọc</span>
+                    </button>
+                </div>
+                <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
+                    <div className="border-b pb-4 mb-4">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-bold">Lọc</h3>
+                            <button onClick={resetFilters} className="text-purple-600 text-sm">Đặt lại</button>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="font-semibold">Thời gian khởi hành</h4>
+                        <ul className="mt-2 space-y-2">
+                            <li className="flex items-center">
+                                <input type="checkbox" id="time-all" checked={filters.time.all} onChange={() => handleFilterChange('time', 'all')} className="mr-2" />
+                                <label htmlFor="time-all">All</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="time-morning" checked={filters.time.morning} onChange={() => handleFilterChange('time', 'morning')} className="mr-2" />
+                                <label htmlFor="time-morning">Sáng (từ 00:00 AM - 11:59 AM)</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="time-afternoon" checked={filters.time.afternoon} onChange={() => handleFilterChange('time', 'afternoon')} className="mr-2" />
+                                <label htmlFor="time-afternoon">Chiều (từ 12:00 PM - 06:59 PM)</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="time-evening" checked={filters.time.evening} onChange={() => handleFilterChange('time', 'evening')} className="mr-2" />
+                                <label htmlFor="time-evening">Tối (từ 07:00 PM - 11:59 PM)</label>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="font-semibold">Nhà Tàu (Công ty)</h4>
+                        <ul className="mt-2 space-y-2">
+                            <li className="flex items-center">
+                                <input type="checkbox" id="operator-all" checked={filters.operator.all} onChange={() => handleFilterChange('operator', 'all')} className="mr-2" />
+                                <label htmlFor="operator-all">All</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="operator-livitrans" checked={filters.operator.livitrans} onChange={() => handleFilterChange('operator', 'livitrans')} className="mr-2" />
+                                <label htmlFor="operator-livitrans">LIVITRANS</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="operator-newLivitrans" checked={filters.operator.newLivitrans} onChange={() => handleFilterChange('operator', 'newLivitrans')} className="mr-2" />
+                                <label htmlFor="operator-newLivitrans">New Livitrans</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="operator-lotusTrain" checked={filters.operator.lotusTrain} onChange={() => handleFilterChange('operator', 'lotusTrain')} className="mr-2" />
+                                <label htmlFor="operator-lotusTrain">LOTUS TRAIN</label>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="font-semibold">Tiện nghi</h4>
+                        <ul className="mt-2 space-y-2">
+                            <li className="flex items-center">
+                                <input type="checkbox" id="amenity-food" checked={filters.amenities.food} onChange={() => handleFilterChange('amenities', 'food')} className="mr-2" />
+                                <label htmlFor="amenity-food">Đồ ăn trên xe</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="amenity-chair" checked={filters.amenities.chair} onChange={() => handleFilterChange('amenities', 'chair')} className="mr-2" />
+                                <label htmlFor="amenity-chair">Ghế Massage</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="amenity-socketPlug" checked={filters.amenities.socketPlug} onChange={() => handleFilterChange('amenities', 'socketPlug')} className="mr-2" />
+                                <label htmlFor="amenity-socketPlug">Ổ cắm</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="amenity-tv" checked={filters.amenities.tv} onChange={() => handleFilterChange('amenities', 'tv')} className="mr-2" />
+                                <label htmlFor="amenity-tv">Ti Vi</label>
+                            </li>
+                            <li className="flex items-center">
+                                <input type="checkbox" id="amenity-wifi" checked={filters.amenities.wifi} onChange={() => handleFilterChange('amenities', 'wifi')} className="mr-2" />
+                                <label htmlFor="amenity-wifi">WiFi</label>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="text-center">
+                        <button onClick={resetFilters} className="bg-purple-600 text-white px-4 py-2 rounded">Đặt lại bộ lọc</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// TripCard Component
+const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void }> = ({ trip, openTripDetails }) => (
+    <div className="border rounded-lg overflow-hidden">
+        <div className="grid grid-cols-12 gap-4 p-4">
+            <div className="col-span-12 md:col-span-2">
+                <div className="font-bold text-lg">{trip.departureTime}</div>
+                <div className="text-sm text-gray-500">{trip.duration}</div>
+                <div className="md:hidden text-sm mt-1">• {trip.bedsAvailable} Giường</div>
+                <div className="text-sm text-gray-500">Arrival Time: {trip.arrivalTime}</div>
+            </div>
+            <div className="col-span-12 md:col-span-5">
+                <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-5">
+                        <div className="font-medium">{trip.fromStation}</div>
+                        <div className="text-sm text-gray-500">({trip.fromCity})</div>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-center"><CFaAngleRight /></div>
+                    <div className="col-span-5">
+                        <div className="font-medium">{trip.toStation}</div>
+                        <div className="text-sm text-gray-500">({trip.toCity})</div>
+                    </div>
+                </div>
+            </div>
+            <div className="hidden md:col-span-1 md:flex items-center">{trip.bedsAvailable} Giường</div>
+            <div className="col-span-12 md:col-span-2 flex flex-col md:flex-row md:items-center md:justify-end gap-2">
+                <div className="flex items-center gap-1">
+                    <span className="font-medium">VND {trip.adultPrice}</span>
+                    <CFaAngleDown />
+                </div>
+            </div>
+            <div className="col-span-12 md:col-span-2 flex justify-end">
+                <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Chọn</button>
+            </div>
+        </div>
+        <div className="bg-gray-50 p-4 grid grid-cols-12 gap-4">
+            <div className="col-span-12 md:col-span-2 flex items-center">
+                <img src={`https://www.easybook.com/images/train/${trip.operator === 'LIVITRANS' ? 'result-logo-livitrans.png' : 'cid-3382-lotus-train.png'}`} alt={trip.operator} className="h-12" />
+            </div>
+            <div className="col-span-12 md:col-span-7">
+                <div className="font-medium">{trip.operator} • Train {trip.trainName} • Coach {trip.coachName}</div>
+                <div className="flex gap-2 mt-1">
+                    {trip.amenities.wifi && <span className="text-blue-500" title="Wifi"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" /></svg></span>}
+                    {trip.amenities.powerPlug && <span className="text-green-500" title="Socket Plug"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg></span>}
+                    {trip.amenities.food && <span className="text-red-500" title="Food On Board"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M18 6a4 4 0 00-4-4h-3a4 4 0 00-4 4v11a1 1 0 102 0V6a2 2 0 012-2h3a2 2 0 012 2v11a1 1 0 102 0V6z" /><path d="M5 5a1 1 0 100-2H4a1 1 0 000 2h1zM3 11a1 1 0 100-2H2a1 1 0 000 2h1zM5 15a1 1 0 100-2H4a1 1 0 000 2h1z" /></svg></span>}
+                </div>
+            </div>
+            <div className="col-span-12 md:col-span-3 flex justify-end items-center">
+                <button onClick={() => openTripDetails(trip)} className="text-purple-600 text-sm">Hình ảnh | Chi tiết</button>
+            </div>
+        </div>
+    </div>
+);
+
+// TripDetailsModal Component
+const TripDetailsModal: React.FC<{
+    selectedTrip: Trip;
+    activeTab: 'details' | 'operator';
+    setActiveTab: React.Dispatch<React.SetStateAction<'details' | 'operator'>>;
+    closeModal: () => void;
+}> = ({ selectedTrip, activeTab, setActiveTab, closeModal }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+                <div className="flex justify-between items-center border-b pb-4 mb-4">
+                    <h3 className="text-xl font-bold">Chi tiết</h3>
+                    <button onClick={closeModal} className="text-gray-500 hover:text-gray-700"><CFaTimes /></button>
+                </div>
+                <div className="mb-4 border-b">
+                    <div className="flex space-x-4">
+                        <button className={`pb-2 px-1 ${activeTab === 'details' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`} onClick={() => setActiveTab('details')}>Trip Details</button>
+                        <button className={`pb-2 px-1 ${activeTab === 'operator' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`} onClick={() => setActiveTab('operator')}>Operator Info</button>
+                    </div>
+                </div>
+                {activeTab === 'details' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div className="bg-green-50 p-3 mb-4"><h4 className="font-bold">Thông tin khởi hành</h4></div>
+                            <table className="w-full text-sm">
+                                <tbody>
+                                    <tr className="border-b"><td className="py-2 font-medium w-1/3">Ngày</td><td className="py-2">10 April 2025</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Giờ</td><td className="py-2">{selectedTrip.departureTime}</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Địa điểm</td><td className="py-2">{selectedTrip.fromStation}</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Địa chỉ</td><td className="py-2">{selectedTrip.fromAddress || '-'}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <div className="bg-green-50 p-3 mb-4"><h4 className="font-bold">Thông tin điểm đến</h4></div>
+                            <table className="w-full text-sm">
+                                <tbody>
+                                    <tr className="border-b"><td className="py-2 font-medium w-1/3">Ngày</td><td className="py-2">11 April 2025</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Giờ</td><td className="py-2">{selectedTrip.arrivalTime}</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Địa điểm</td><td className="py-2">{selectedTrip.toStation}</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Địa chỉ</td><td className="py-2">{selectedTrip.toAddress || '-'}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <div className="bg-green-50 p-3 mb-4"><h4 className="font-bold">Thông tin loại xe và giá vé</h4></div>
+                            <table className="w-full text-sm">
+                                <tbody>
+                                    <tr className="border-b"><td className="py-2 font-medium w-1/3">Mã tàu</td><td className="py-2">{selectedTrip.trainName || '-'}</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Loại ghế</td><td className="py-2">Berth Coach</td></tr>
+                                    <tr className="border-b"><td className="py-2 font-medium">Giá vé</td><td className="py-2">Người lớn: VND {selectedTrip.adultPrice}<br />Trẻ em: VND {selectedTrip.childPrice}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {selectedTrip.fromLatitude && selectedTrip.fromLongitude && (
+                            <div>
+                                <div className="bg-green-50 p-3 mb-4"><h4 className="font-bold">Depart Location Map</h4></div>
+                                <div className="h-48 bg-gray-200 rounded flex items-center justify-center"><span className="text-gray-500">Map would be displayed here</span></div>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {activeTab === 'operator' && (
+                    <div className="mt-4">
+                        <h1 className="text-xl font-bold">{selectedTrip.operator}</h1>
+                    </div>
+                )}
+                <div className="mt-6 flex justify-end">
+                    <button onClick={closeModal} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+// TrainSearchResults Component
 const TrainSearchResults: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details');
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters] = useState({
-        time: {
-            morning: false,
-            afternoon: false,
-            evening: false,
-            all: true
-        },
-        operator: {
-            livitrans: false,
-            newLivitrans: false,
-            lotusTrain: false,
-            all: true
-        },
-        amenities: {
-            food: false,
-            chair: false,
-            socketPlug: false,
-            tv: false,
-            wifi: false
-        },
-        pickup: {
-            gaHanoi: false
-        },
-        dropoff: {
-            gaDanang: false
-        }
+    const [filters, setFilters] = useState<FilterTypes>({
+        time: { morning: false, afternoon: false, evening: false, all: true },
+        operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true },
+        amenities: { food: false, chair: false, socketPlug: false, tv: false, wifi: false },
+        pickup: { gaHanoi: false },
+        dropoff: { gaDanang: false }
     });
 
     const trips: Trip[] = [
@@ -114,603 +357,54 @@ const TrainSearchResults: React.FC = () => {
             coachName: "TÀU SE3: HÀ NỘI - ĐÀ NẴNG 19:20",
             adultPrice: "1.850.000",
             childPrice: "1.850.000",
-            amenities: {
-                wifi: true,
-                powerPlug: true,
-                food: true
-            },
+            amenities: { wifi: true, powerPlug: true, food: true },
             isLuxury: false
-        },
-        // Add other trips similarly...
+        }
     ];
 
-    type TimeFilter = { morning: boolean; afternoon: boolean; evening: boolean; all: boolean; };
-    type OperatorFilter = { livitrans: boolean; newLivitrans: boolean; lotusTrain: boolean; all: boolean; };
-    type FilterTypes = {
-        time: TimeFilter;
-        operator: OperatorFilter;
-        amenities: Record<string, boolean>;
-        pickup: Record<string, boolean>;
-        dropoff: Record<string, boolean>;
-    };
-
-    const handleFilterChange = (filterType: keyof FilterTypes, filterKey: string) => {
-        setFilters(prev => {
-            const newFilters = { ...prev };
-
-            if (filterType === 'time' || filterType === 'operator') {
-                const filter = newFilters[filterType] as TimeFilter | OperatorFilter;
-                if (filterKey === 'all') {
-                    Object.keys(filter).forEach(key => {
-                        (filter as Record<string, boolean>)[key] = key === 'all';
-                    });
-                } else {
-                    (filter as Record<string, boolean>)[filterKey] = !(filter as Record<string, boolean>)[filterKey];
-                    filter.all = false;
-                }
-            } else {
-                (newFilters[filterType] as Record<string, boolean>)[filterKey] = !(newFilters[filterType] as Record<string, boolean>)[filterKey];
-            }
-
-            return newFilters;
-        });
-    };
-
-    const resetFilters = () => {
-        setFilters({
-            time: {
-                morning: false,
-                afternoon: false,
-                evening: false,
-                all: true
-            },
-            operator: {
-                livitrans: false,
-                newLivitrans: false,
-                lotusTrain: false,
-                all: true
-            },
-            amenities: {
-                food: false,
-                chair: false,
-                socketPlug: false,
-                tv: false,
-                wifi: false
-            },
-            pickup: {
-                gaHanoi: false
-            },
-            dropoff: {
-                gaDanang: false
-            }
-        });
-    };
+    const resetFilters = () => setFilters({
+        time: { morning: false, afternoon: false, evening: false, all: true },
+        operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true },
+        amenities: { food: false, chair: false, socketPlug: false, tv: false, wifi: false },
+        pickup: { gaHanoi: false },
+        dropoff: { gaDanang: false }
+    });
 
     const openTripDetails = (trip: Trip) => {
         setSelectedTrip(trip);
         setActiveTab('details');
     };
 
-    const closeModal = () => {
-        setSelectedTrip(null);
-    };
+    const closeModal = () => setSelectedTrip(null);
 
     return (
         <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row gap-6">
-                {/* Filters Sidebar */}
-                <div className="w-full md:w-1/4">
-                    <div className="bg-white rounded-lg shadow-md p-4">
-                        <div className="md:hidden mb-4">
-                            <button
-                                onClick={() => setShowFilters(!showFilters)}
-                                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded"
-                            >
-                                <CFaSlidersH />
-                                <span>Lọc</span>
-                            </button>
-                        </div>
-
-                        <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
-                            <div className="border-b pb-4 mb-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-bold">Lọc</h3>
-                                    <button
-                                        onClick={resetFilters}
-                                        className="text-purple-600 text-sm"
-                                    >
-                                        Đặt lại
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Time Filter */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center cursor-pointer">
-                                    <h4 className="font-semibold">Thời gian khởi hành</h4>
-                                </div>
-                                <ul className="mt-2 space-y-2">
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="time-all"
-                                            checked={filters.time.all}
-                                            onChange={() => handleFilterChange('time', 'all')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="time-all">All</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="time-morning"
-                                            checked={filters.time.morning}
-                                            onChange={() => handleFilterChange('time', 'morning')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="time-morning">Sáng (từ 00:00 AM - 11:59 AM)</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="time-afternoon"
-                                            checked={filters.time.afternoon}
-                                            onChange={() => handleFilterChange('time', 'afternoon')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="time-afternoon">Chiều (từ 12:00 PM - 06:59 PM)</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="time-evening"
-                                            checked={filters.time.evening}
-                                            onChange={() => handleFilterChange('time', 'evening')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="time-evening">Tối (từ 07:00 PM - 11:59 PM)</label>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Operator Filter */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center cursor-pointer">
-                                    <h4 className="font-semibold">Nhà Tàu (Công ty)</h4>
-                                </div>
-                                <ul className="mt-2 space-y-2">
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="operator-all"
-                                            checked={filters.operator.all}
-                                            onChange={() => handleFilterChange('operator', 'all')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="operator-all">All</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="operator-livitrans"
-                                            checked={filters.operator.livitrans}
-                                            onChange={() => handleFilterChange('operator', 'livitrans')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="operator-livitrans">LIVITRANS</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="operator-newLivitrans"
-                                            checked={filters.operator.newLivitrans}
-                                            onChange={() => handleFilterChange('operator', 'newLivitrans')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="operator-newLivitrans">New Livitrans</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="operator-lotusTrain"
-                                            checked={filters.operator.lotusTrain}
-                                            onChange={() => handleFilterChange('operator', 'lotusTrain')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="operator-lotusTrain">LOTUS TRAIN</label>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Amenities Filter */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center cursor-pointer">
-                                    <h4 className="font-semibold">Tiện nghi</h4>
-                                </div>
-                                <ul className="mt-2 space-y-2">
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="amenity-food"
-                                            checked={filters.amenities.food}
-                                            onChange={() => handleFilterChange('amenities', 'food')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="amenity-food">Đồ ăn trên xe</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="amenity-chair"
-                                            checked={filters.amenities.chair}
-                                            onChange={() => handleFilterChange('amenities', 'chair')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="amenity-chair">Ghế Massage</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="amenity-socketPlug"
-                                            checked={filters.amenities.socketPlug}
-                                            onChange={() => handleFilterChange('amenities', 'socketPlug')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="amenity-socketPlug">Ổ cắm</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="amenity-tv"
-                                            checked={filters.amenities.tv}
-                                            onChange={() => handleFilterChange('amenities', 'tv')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="amenity-tv">Ti Vi</label>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="amenity-wifi"
-                                            checked={filters.amenities.wifi}
-                                            onChange={() => handleFilterChange('amenities', 'wifi')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="amenity-wifi">WiFi</label>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Pickup Filter */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center cursor-pointer">
-                                    <h4 className="font-semibold">Điểm Đón Khách</h4>
-                                </div>
-                                <ul className="mt-2 space-y-2">
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="pickup-gaHanoi"
-                                            checked={filters.pickup.gaHanoi}
-                                            onChange={() => handleFilterChange('pickup', 'gaHanoi')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="pickup-gaHanoi">Ga Hà Nội</label>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Dropoff Filter */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center cursor-pointer">
-                                    <h4 className="font-semibold">Điểm Trả Khách</h4>
-                                </div>
-                                <ul className="mt-2 space-y-2">
-                                    <li className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="dropoff-gaDanang"
-                                            checked={filters.dropoff.gaDanang}
-                                            onChange={() => handleFilterChange('dropoff', 'gaDanang')}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="dropoff-gaDanang">Ga Đà Nẵng</label>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div className="text-center">
-                                <button
-                                    onClick={resetFilters}
-                                    className="bg-purple-600 text-white px-4 py-2 rounded"
-                                >
-                                    Đặt lại bộ lọc
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Results Section */}
+                <FilterSidebar filters={filters} setFilters={setFilters} showFilters={showFilters} setShowFilters={setShowFilters} resetFilters={resetFilters} />
                 <div className="w-full md:w-3/4">
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        {/* Route Info */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold">Hà Nội, Việt Nam</span>
                                 <CFaLongArrowAltRight />
                                 <span className="font-semibold">Đà Nẵng, Việt Nam</span>
                             </div>
-                            <button className="md:hidden">
-                                <CFaEdit />
-                            </button>
+                            <button className="md:hidden"><CFaEdit /></button>
                         </div>
-
-                        {/* Sorting Row */}
                         <div className="hidden md:grid grid-cols-12 gap-4 mb-4 text-sm border-b pb-2">
-                            <div className="col-span-2 font-semibold flex items-center gap-1">
-                                <span>Giờ khởi hành</span>
-                                <CFaCaretDown />
-                            </div>
-                            <div className="col-span-4 font-semibold flex items-center gap-1">
-                                <span>Tuyến</span>
-                                <CFaSort />
-                            </div>
-                            <div className="col-span-2 font-semibold flex items-center gap-1 justify-end">
-                                <span>Loại ghế</span>
-                                <CFaSort />
-                            </div>
-                            <div className="col-span-2 font-semibold flex items-center gap-1 justify-end">
-                                <span>Giá vé</span>
-                                <CFaCaretUp />
-                            </div>
+                            <div className="col-span-2 font-semibold flex items-center gap-1"><span>Giờ khởi hành</span><CFaCaretDown /></div>
+                            <div className="col-span-4 font-semibold flex items-center gap-1"><span>Tuyến</span><CFaSort /></div>
+                            <div className="col-span-2 font-semibold flex items-center gap-1 justify-end"><span>Loại ghế</span><CFaSort /></div>
+                            <div className="col-span-2 font-semibold flex items-center gap-1 justify-end"><span>Giá vé</span><CFaCaretUp /></div>
                             <div className="col-span-2"></div>
                         </div>
-
-                        {/* Trip List */}
                         <div className="space-y-6">
-                            {trips.map(trip => (
-                                <div key={trip.id} className="border rounded-lg overflow-hidden">
-                                    {/* Main Trip Info */}
-                                    <div className="grid grid-cols-12 gap-4 p-4">
-                                        <div className="col-span-12 md:col-span-2">
-                                            <div className="font-bold text-lg">{trip.departureTime}</div>
-                                            <div className="text-sm text-gray-500">{trip.duration}</div>
-                                            <div className="md:hidden text-sm mt-1">• {trip.bedsAvailable} Giường</div>
-                                            <div className="text-sm text-gray-500">Arrival Time: {trip.arrivalTime}</div>
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-5">
-                                            <div className="grid grid-cols-12 gap-2">
-                                                <div className="col-span-5">
-                                                    <div className="font-medium">{trip.fromStation}</div>
-                                                    <div className="text-sm text-gray-500">({trip.fromCity})</div>
-                                                </div>
-                                                <div className="col-span-2 flex items-center justify-center">
-                                                    <CFaAngleRight />
-                                                </div>
-                                                <div className="col-span-5">
-                                                    <div className="font-medium">{trip.toStation}</div>
-                                                    <div className="text-sm text-gray-500">({trip.toCity})</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="hidden md:col-span-1 md:flex items-center">
-                                            <div>{trip.bedsAvailable} Giường</div>
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-2 flex flex-col md:flex-row md:items-center md:justify-end gap-2">
-                                            <div className="flex items-center gap-1">
-                                                <span className="font-medium">VND {trip.adultPrice}</span>
-                                                <CFaAngleDown />
-                                            </div>
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-2 flex justify-end">
-                                            <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                                                Chọn
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Additional Info */}
-                                    <div className="bg-gray-50 p-4 grid grid-cols-12 gap-4">
-                                        <div className="col-span-12 md:col-span-2 flex items-center">
-                                            <img
-                                                src={`https://www.easybook.com/images/train/${trip.operator === 'LIVITRANS' ? 'result-logo-livitrans.png' : 'cid-3382-lotus-train.png'}`}
-                                                alt={trip.operator}
-                                                className="h-12"
-                                            />
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-7">
-                                            <div className="font-medium">
-                                                {trip.operator} • Train {trip.trainName} • Coach {trip.coachName}
-                                            </div>
-                                            <div className="flex gap-2 mt-1">
-                                                {trip.amenities.wifi && (
-                                                    <span className="text-blue-500" title="Wifi">
-                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </span>
-                                                )}
-                                                {trip.amenities.powerPlug && (
-                                                    <span className="text-green-500" title="Socket Plug">
-                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </span>
-                                                )}
-                                                {trip.amenities.food && (
-                                                    <span className="text-red-500" title="Food On Board">
-                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M18 6a4 4 0 00-4-4h-3a4 4 0 00-4 4v11a1 1 0 102 0V6a2 2 0 012-2h3a2 2 0 012 2v11a1 1 0 102 0V6z" />
-                                                            <path d="M5 5a1 1 0 100-2H4a1 1 0 000 2h1zM3 11a1 1 0 100-2H2a1 1 0 000 2h1zM5 15a1 1 0 100-2H4a1 1 0 000 2h1z" />
-                                                        </svg>
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-3 flex justify-end items-center">
-                                            <button
-                                                onClick={() => openTripDetails(trip)}
-                                                className="text-purple-600 text-sm"
-                                            >
-                                                Hình ảnh | Chi tiết
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                            {trips.map(trip => <TripCard key={trip.id} trip={trip} openTripDetails={openTripDetails} />)}
                         </div>
                     </div>
                 </div>
+                {selectedTrip && <TripDetailsModal selectedTrip={selectedTrip} activeTab={activeTab} setActiveTab={setActiveTab} closeModal={closeModal} />}
             </div>
-
-            {/* Trip Details Modal */}
-            {selectedTrip && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center border-b pb-4 mb-4">
-                                <h3 className="text-xl font-bold">Chi tiết</h3>
-                                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                                    <CFaTimes />
-                                </button>
-                            </div>
-
-                            <div className="mb-4 border-b">
-                                <div className="flex space-x-4">
-                                    <button
-                                        className={`pb-2 px-1 ${activeTab === 'details' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`}
-                                        onClick={() => setActiveTab('details')}
-                                    >
-                                        Trip Details
-                                    </button>
-                                    <button
-                                        className={`pb-2 px-1 ${activeTab === 'operator' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`}
-                                        onClick={() => setActiveTab('operator')}
-                                    >
-                                        Operator Info
-                                    </button>
-                                </div>
-                            </div>
-
-                            {activeTab === 'details' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <div className="bg-green-50 p-3 mb-4">
-                                            <h4 className="font-bold">Thông tin khởi hành</h4>
-                                        </div>
-                                        <table className="w-full text-sm">
-                                            <tbody>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium w-1/3">Ngày</td>
-                                                    <td className="py-2">10 April 2025</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Giờ</td>
-                                                    <td className="py-2">{selectedTrip.departureTime}</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Địa điểm</td>
-                                                    <td className="py-2">{selectedTrip.fromStation}</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Địa chỉ</td>
-                                                    <td className="py-2">{selectedTrip.fromAddress || '-'}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div>
-                                        <div className="bg-green-50 p-3 mb-4">
-                                            <h4 className="font-bold">Thông tin điểm đến</h4>
-                                        </div>
-                                        <table className="w-full text-sm">
-                                            <tbody>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium w-1/3">Ngày</td>
-                                                    <td className="py-2">11 April 2025</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Giờ</td>
-                                                    <td className="py-2">{selectedTrip.arrivalTime}</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Địa điểm</td>
-                                                    <td className="py-2">{selectedTrip.toStation}</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Địa chỉ</td>
-                                                    <td className="py-2">{selectedTrip.toAddress || '-'}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div>
-                                        <div className="bg-green-50 p-3 mb-4">
-                                            <h4 className="font-bold">Thông tin loại xe và giá vé</h4>
-                                        </div>
-                                        <table className="w-full text-sm">
-                                            <tbody>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium w-1/3">Mã tàu</td>
-                                                    <td className="py-2">{selectedTrip.trainName || '-'}</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Loại ghế</td>
-                                                    <td className="py-2">Berth Coach</td>
-                                                </tr>
-                                                <tr className="border-b">
-                                                    <td className="py-2 font-medium">Giá vé</td>
-                                                    <td className="py-2">
-                                                        Người lớn: VND {selectedTrip.adultPrice}
-                                                        <br />
-                                                        Trẻ em: VND {selectedTrip.childPrice}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    {selectedTrip.fromLatitude && selectedTrip.fromLongitude && (
-                                        <div>
-                                            <div className="bg-green-50 p-3 mb-4">
-                                                <h4 className="font-bold">Depart Location Map</h4>
-                                            </div>
-                                            <div className="h-48 bg-gray-200 rounded flex items-center justify-center">
-                                                <span className="text-gray-500">Map would be displayed here</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {activeTab === 'operator' && (
-                                <div className="mt-4">
-                                    <h1 className="text-xl font-bold">{selectedTrip.operator}</h1>
-                                    {/* Additional operator info would go here */}
-                                </div>
-                            )}
-
-                            <div className="mt-6 flex justify-end">
-                                <button
-                                    onClick={closeModal}
-                                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
-                                >
-                                    Đóng
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
