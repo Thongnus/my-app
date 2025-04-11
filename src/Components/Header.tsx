@@ -174,7 +174,7 @@ const AccountDropdown = () => {
             <MenuItem>
               {({ active }) => (
                 <Link
-                  to="/vi-vn/account/login"
+                  to="/login"
                   className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
                 >
                   Đăng Nhập
@@ -184,7 +184,7 @@ const AccountDropdown = () => {
             <MenuItem>
               {({ active }) => (
                 <Link
-                  to="/vi-vn/account/register"
+                  to="/signup"
                   className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
                 >
                   Đăng Ký
@@ -204,14 +204,14 @@ export default function Header() {
       <div className="container mx-auto px-4 py-2 flex items-center justify-between">
         {/* Logo section */}
         <div className="flex items-center space-x-4">
-          <Link to="/vi-vn">
+          <Link to="/">
             <img
               src="https://easycdn.blob.core.windows.net/images/easybook-logo-v3.png"
               alt="Easybook Logo"
               className="h-8"
             />
           </Link>
-          <Link to="/vi-vn">
+          <Link to="/">
             <img
               src="/images/sonphat/Sonphat-logo-full.png"
               alt="Sonphat Logo"
