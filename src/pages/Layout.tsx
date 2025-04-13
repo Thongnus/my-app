@@ -11,12 +11,7 @@ const Layout = () => {
   return (
     
     <div className="layout">
-    
          <HeroSection/>
-      <Header />
-      <Link to="/loginsignup" className="text-blue-600 hover:underline">
-                    Đi đến Đăng Nhập / Đăng Ký
-                </Link>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
     FaSlidersH, FaEdit, FaLongArrowAltRight, FaAngleRight, FaAngleDown, FaSort, FaCaretDown, FaCaretUp, FaInfoCircle, FaTimes
 } from 'react-icons/fa';
+
 const CFaTimes = FaTimes as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaInfoCircle = FaInfoCircle as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaSort = FaSort as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -12,6 +13,7 @@ const CFaEdit = FaEdit as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaSlidersH = FaSlidersH as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaCaretDown = FaCaretDown as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaCaretUp = FaCaretUp as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
+
 // Type definitions
 interface Trip {
     id: string;
@@ -64,19 +66,37 @@ const FilterSidebar: React.FC<{
     const handleFilterChange = (filterType: keyof FilterTypes, filterKey: string) => {
         setFilters(prev => {
             const newFilters = { ...prev };
-            if (filterType === 'time' || filterType === 'operator') {
-                const filter = newFilters[filterType] as TimeFilter | OperatorFilter;
+
+            if (filterType === 'time') {
+                const timeFilter = { ...newFilters.time };
                 if (filterKey === 'all') {
-                    Object.keys(filter).forEach(key => {
-                        (filter as Record<string, boolean>)[key] = key === 'all';
-                    });
+                    timeFilter.morning = false;
+                    timeFilter.afternoon = false;
+                    timeFilter.evening = false;
+                    timeFilter.all = true;
                 } else {
-                    (filter as Record<string, boolean>)[filterKey] = !(filter as Record<string, boolean>)[filterKey];
-                    filter.all = false;
+                    timeFilter[filterKey as keyof TimeFilter] = !timeFilter[filterKey as keyof TimeFilter];
+                    timeFilter.all = !(timeFilter.morning || timeFilter.afternoon || timeFilter.evening);
                 }
+                newFilters.time = timeFilter;
+            } else if (filterType === 'operator') {
+                const operatorFilter = { ...newFilters.operator };
+                if (filterKey === 'all') {
+                    operatorFilter.livitrans = false;
+                    operatorFilter.newLivitrans = false;
+                    operatorFilter.lotusTrain = false;
+                    operatorFilter.all = true;
+                } else {
+                    operatorFilter[filterKey as keyof OperatorFilter] = !operatorFilter[filterKey as keyof OperatorFilter];
+                    operatorFilter.all = !(operatorFilter.livitrans || operatorFilter.newLivitrans || operatorFilter.lotusTrain);
+                }
+                newFilters.operator = operatorFilter;
             } else {
-                (newFilters[filterType] as Record<string, boolean>)[filterKey] = !(newFilters[filterType] as Record<string, boolean>)[filterKey];
+                const otherFilter = { ...newFilters[filterType] };
+                otherFilter[filterKey] = !otherFilter[filterKey];
+                newFilters[filterType] = otherFilter;
             }
+
             return newFilters;
         });
     };
@@ -101,19 +121,43 @@ const FilterSidebar: React.FC<{
                         <h4 className="font-semibold">Thời gian khởi hành</h4>
                         <ul className="mt-2 space-y-2">
                             <li className="flex items-center">
-                                <input type="checkbox" id="time-all" checked={filters.time.all} onChange={() => handleFilterChange('time', 'all')} className="mr-2" />
-                                <label htmlFor="time-all">All</label>
+                                <input
+                                    type="checkbox"
+                                    id="time-all"
+                                    checked={filters.time.all}
+                                    onChange={() => handleFilterChange('time', 'all')}
+                                    className="mr-2"
+                                />
+                                <label htmlFor="time-all">Tất cả</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="time-morning" checked={filters.time.morning} onChange={() => handleFilterChange('time', 'morning')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="time-morning"
+                                    checked={filters.time.morning}
+                                    onChange={() => handleFilterChange('time', 'morning')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="time-morning">Sáng (từ 00:00 AM - 11:59 AM)</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="time-afternoon" checked={filters.time.afternoon} onChange={() => handleFilterChange('time', 'afternoon')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="time-afternoon"
+                                    checked={filters.time.afternoon}
+                                    onChange={() => handleFilterChange('time', 'afternoon')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="time-afternoon">Chiều (từ 12:00 PM - 06:59 PM)</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="time-evening" checked={filters.time.evening} onChange={() => handleFilterChange('time', 'evening')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="time-evening"
+                                    checked={filters.time.evening}
+                                    onChange={() => handleFilterChange('time', 'evening')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="time-evening">Tối (từ 07:00 PM - 11:59 PM)</label>
                             </li>
                         </ul>
@@ -123,19 +167,43 @@ const FilterSidebar: React.FC<{
                         <h4 className="font-semibold">Nhà Tàu (Công ty)</h4>
                         <ul className="mt-2 space-y-2">
                             <li className="flex items-center">
-                                <input type="checkbox" id="operator-all" checked={filters.operator.all} onChange={() => handleFilterChange('operator', 'all')} className="mr-2" />
-                                <label htmlFor="operator-all">All</label>
+                                <input
+                                    type="checkbox"
+                                    id="operator-all"
+                                    checked={filters.operator.all}
+                                    onChange={() => handleFilterChange('operator', 'all')}
+                                    className="mr-2"
+                                />
+                                <label htmlFor="operator-all">Tất cả</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="operator-livitrans" checked={filters.operator.livitrans} onChange={() => handleFilterChange('operator', 'livitrans')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="operator-livitrans"
+                                    checked={filters.operator.livitrans}
+                                    onChange={() => handleFilterChange('operator', 'livitrans')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="operator-livitrans">LIVITRANS</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="operator-newLivitrans" checked={filters.operator.newLivitrans} onChange={() => handleFilterChange('operator', 'newLivitrans')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="operator-newLivitrans"
+                                    checked={filters.operator.newLivitrans}
+                                    onChange={() => handleFilterChange('operator', 'newLivitrans')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="operator-newLivitrans">New Livitrans</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="operator-lotusTrain" checked={filters.operator.lotusTrain} onChange={() => handleFilterChange('operator', 'lotusTrain')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="operator-lotusTrain"
+                                    checked={filters.operator.lotusTrain}
+                                    onChange={() => handleFilterChange('operator', 'lotusTrain')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="operator-lotusTrain">LOTUS TRAIN</label>
                             </li>
                         </ul>
@@ -145,23 +213,53 @@ const FilterSidebar: React.FC<{
                         <h4 className="font-semibold">Tiện nghi</h4>
                         <ul className="mt-2 space-y-2">
                             <li className="flex items-center">
-                                <input type="checkbox" id="amenity-food" checked={filters.amenities.food} onChange={() => handleFilterChange('amenities', 'food')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="amenity-food"
+                                    checked={filters.amenities.food}
+                                    onChange={() => handleFilterChange('amenities', 'food')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="amenity-food">Đồ ăn trên xe</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="amenity-chair" checked={filters.amenities.chair} onChange={() => handleFilterChange('amenities', 'chair')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="amenity-chair"
+                                    checked={filters.amenities.chair}
+                                    onChange={() => handleFilterChange('amenities', 'chair')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="amenity-chair">Ghế Massage</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="amenity-socketPlug" checked={filters.amenities.socketPlug} onChange={() => handleFilterChange('amenities', 'socketPlug')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="amenity-socketPlug"
+                                    checked={filters.amenities.socketPlug}
+                                    onChange={() => handleFilterChange('amenities', 'socketPlug')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="amenity-socketPlug">Ổ cắm</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="amenity-tv" checked={filters.amenities.tv} onChange={() => handleFilterChange('amenities', 'tv')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="amenity-tv"
+                                    checked={filters.amenities.tv}
+                                    onChange={() => handleFilterChange('amenities', 'tv')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="amenity-tv">Ti Vi</label>
                             </li>
                             <li className="flex items-center">
-                                <input type="checkbox" id="amenity-wifi" checked={filters.amenities.wifi} onChange={() => handleFilterChange('amenities', 'wifi')} className="mr-2" />
+                                <input
+                                    type="checkbox"
+                                    id="amenity-wifi"
+                                    checked={filters.amenities.wifi}
+                                    onChange={() => handleFilterChange('amenities', 'wifi')}
+                                    className="mr-2"
+                                />
                                 <label htmlFor="amenity-wifi">WiFi</label>
                             </li>
                         </ul>
@@ -217,9 +315,43 @@ const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void }> 
             <div className="col-span-12 md:col-span-7">
                 <div className="font-medium">{trip.operator} • Train {trip.trainName} • Coach {trip.coachName}</div>
                 <div className="flex gap-2 mt-1">
-                    {trip.amenities.wifi && <span className="text-blue-500" title="Wifi"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" /></svg></span>}
-                    {trip.amenities.powerPlug && <span className="text-green-500" title="Socket Plug"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg></span>}
-                    {trip.amenities.food && <span className="text-red-500" title="Food On Board"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M18 6a4 4 0 00-4-4h-3a4 4 0 00-4 4v11a1 1 0 102 0V6a2 2 0 012-2h3a2 2 0 012 2v11a1 1 0 102 0V6z" /><path d="M5 5a1 1 0 100-2H4a1 1 0 000 2h1zM3 11a1 1 0 100-2H2a1 1 0 000 2h1zM5 15a1 1 0 100-2H4a1 1 0 000 2h1z" /></svg></span>}
+                    {trip.amenities.wifi && (
+                        <div className="relative group">
+                            <span className="text-blue-500">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
+                                </svg>
+                            </span>
+                            <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                WiFi
+                            </span>
+                        </div>
+                    )}
+                    {trip.amenities.powerPlug && (
+                        <div className="relative group">
+                            <span className="text-green-500">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                </svg>
+                            </span>
+                            <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Socket Plug
+                            </span>
+                        </div>
+                    )}
+                    {trip.amenities.food && (
+                        <div className="relative group">
+                            <span className="text-red-500">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M18 6a4 4 0 00-4-4h-3a4 4 0 00-4 4v11a1 1 0 102 0V6a2 2 0 012-2h3a2 2 0 012 2v11a1 1 0 102 0V6z" />
+                                    <path d="M5 5a1 1 0 100-2H4a1 1 0 000 2h1zM3 11a1 1 0 100-2H2a1 1 0 000 2h1zM5 15a1 1 0 100-2H4a1 1 0 000 2h1z" />
+                                </svg>
+                            </span>
+                            <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                Food On Board
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="col-span-12 md:col-span-3 flex justify-end items-center">
@@ -362,6 +494,44 @@ const TrainSearchResults: React.FC = () => {
         }
     ];
 
+    const filteredTrips = trips.filter(trip => {
+        const departureTime = trip.departureTime;
+        const [hourStr, period] = departureTime.split(' ');
+        let hour = parseInt(hourStr.split(':')[0]);
+        if (period === 'PM' && hour !== 12) hour += 12;
+        if (period === 'AM' && hour === 12) hour = 0;
+
+        const isMorning = hour >= 0 && hour < 12;
+        const isAfternoon = hour >= 12 && hour < 19;
+        const isEvening = hour >= 19 && hour <= 23;
+
+        const timeMatch =
+            filters.time.all ||
+            (filters.time.morning && isMorning) ||
+            (filters.time.afternoon && isAfternoon) ||
+            (filters.time.evening && isEvening);
+
+        const operatorMatch =
+            filters.operator.all ||
+            (filters.operator.livitrans && trip.operator === 'LIVITRANS') ||
+            (filters.operator.newLivitrans && trip.operator === 'New Livitrans') ||
+            (filters.operator.lotusTrain && trip.operator === 'LOTUS TRAIN');
+
+        const amenitiesMatch =
+            (!filters.amenities.food || trip.amenities.food) &&
+            (!filters.amenities.chair || trip.amenities.massageChair) &&
+            (!filters.amenities.socketPlug || trip.amenities.powerPlug) &&
+            (!filters.amenities.tv || trip.amenities.tv) &&
+            (!filters.amenities.wifi || trip.amenities.wifi);
+
+        const pickupMatch =
+            !filters.pickup.gaHanoi || trip.fromStation === 'Ga Hà Nội';
+        const dropoffMatch =
+            !filters.dropoff.gaDanang || trip.toStation === 'Ga Đà Nẵng';
+
+        return timeMatch && operatorMatch && amenitiesMatch && pickupMatch && dropoffMatch;
+    });
+
     const resetFilters = () => setFilters({
         time: { morning: false, afternoon: false, evening: false, all: true },
         operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true },
@@ -399,7 +569,13 @@ const TrainSearchResults: React.FC = () => {
                             <div className="col-span-2"></div>
                         </div>
                         <div className="space-y-6">
-                            {trips.map(trip => <TripCard key={trip.id} trip={trip} openTripDetails={openTripDetails} />)}
+                            {filteredTrips.length > 0 ? (
+                                filteredTrips.map(trip => <TripCard key={trip.id} trip={trip} openTripDetails={openTripDetails} />)
+                            ) : (
+                                <div className="text-center text-gray-500 py-4">
+                                    Không tìm thấy chuyến đi nào phù hợp với bộ lọc.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
