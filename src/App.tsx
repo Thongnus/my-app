@@ -13,7 +13,7 @@ import Header from './Components/Header';
 import { LoginForm, SignupForm } from './Components/login/LoginSignup';
 import LayoutSearch from './pages/LayoutSearch';
 import HeaderSelection from './Components/Popup/PopupSelectSeat';
-import TrainTicketPopup from './Components/TrainTicketBooking';
+
 import SeatSelection from './Components/Popup/SeatSelection';
 
 
