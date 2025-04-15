@@ -13,6 +13,9 @@ import Header from './Components/Header';
 import { LoginForm, SignupForm } from './Components/login/LoginSignup';
 import LayoutSearch from './pages/LayoutSearch';
 import HeaderSelection from './Components/Popup/PopupSelectSeat';
+import TrainTicketPopup from './Components/TrainTicketBooking';
+import SeatSelection from './Components/Popup/SeatSelection';
+
 
 
 
@@ -37,6 +40,7 @@ const App: React.FC = () => {
                 <Route path="/train-booking" element={<Layout />} />
                 <Route path="/train-search-results" element={<LayoutSearch />} />
                 <Route path ="/Train-selection" element={<HeaderSelection />} />
+                <Route path ="/1" element={   <SeatSelection coach={''} seats={[]}/>} />
             </Routes>
    <Footer/>
   
