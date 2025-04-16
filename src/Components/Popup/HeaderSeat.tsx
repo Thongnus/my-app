@@ -51,7 +51,7 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
 
       {/* Train Coaches Section */}
       <div className="p-4">
-        <div className="flex items-center">
+        <div className="flex items-flex items-center justify-end p-4">
           {/* Scrollable Coaches Container */}
           <div className="flex overflow-x-auto overflow-y-hidden scrollbar-hide">
             {/* Coaches in reverse order (Toa 9 to Toa 1) */}
