@@ -30,7 +30,7 @@ const TripTabs = ({
   };
 
   return (
-    <div className="w-[76%] mx-auto px-4 py-6">
+    <div className="container  mx-auto px-4 py-6">
       <div className="flex rounded-xl overflow-hidden shadow-md">
         {/* Tab: Chiều đi */}
         <div

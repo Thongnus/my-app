@@ -81,14 +81,33 @@ const TrainBookingForm = () => {
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (validateForm()) {
+      const params = new URLSearchParams({
+        from: formData.departure?.value || '',
+        to: formData.destination?.value || '',
+        departureDate: formData.departureDate.toISOString(),
+        returnDate: formData.returnDate ? formData.returnDate.toISOString() : '',
+        passengers: formData.passengers,
+        roundTrip: formData.roundTrip.toString(),
+      });
       console.log('Form submitted:', formData);
-      navigate('/train-search-results');
+      navigate('/train-search-results'
+        + '?' + params.toString(), {
+        state: {
+          from: formData.departure?.value,
+          to: formData.destination?.value,
+          departureDate: formData.departureDate,
+          returnDate: formData.returnDate,
+          passengers: formData.passengers,
+          roundTrip: formData.roundTrip,
+        },
+      }
+      );
     }
   };
 
   return (
     <div className="bg-[length:100%_auto] bg-no-repeat bg-[url(https://easycdn.blob.core.windows.net/images/hero-images/vn-05.jpg)] py-12">
-      <div className="container max-w-[1300px] mx-auto px-4">
+      <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold mb-8 text-center text-white drop-shadow-lg">
           Đặt Vé Tàu Hỏa
         </h1>

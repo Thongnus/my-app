@@ -23,10 +23,7 @@ import SeatSelection from './Components/Popup/SeatSelection';
 
 
 const App: React.FC = () => {
-  const [from, setFrom] = useState("Hà Nội");
-  const [fromCode, setFromCode] = useState("HNO");
-  const [to, setTo] = useState("Lào Cai");
-  const [toCode, setToCode] = useState("LCA");
+  
   return (
     <>
    {/* <Layout/> */}

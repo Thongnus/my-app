@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
     FaSlidersH, FaEdit, FaLongArrowAltRight, FaAngleRight, FaAngleDown, FaSort, FaCaretDown, FaCaretUp, FaInfoCircle, FaTimes
 } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 const CFaTimes = FaTimes as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaInfoCircle = FaInfoCircle as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -100,7 +101,6 @@ const FilterSidebar: React.FC<{
             return newFilters;
         });
     };
-
     return (
         <div className="w-full md:w-1/4">
             <div className="bg-white rounded-lg shadow-md p-4">
@@ -438,6 +438,9 @@ const TripDetailsModal: React.FC<{
 
 // TrainSearchResults Component
 const TrainSearchResults: React.FC = () => {
+    const location = useLocation();  // Lấy thông tin location hiện tại
+    const queryParams = new URLSearchParams(location.search);  // Truy xuất các tham số từ URL
+    const from = queryParams.get('from') || 'Hà Nội';  // Giá trị mặc định nếu không có tham số
     const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details');
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [showFilters, setShowFilters] = useState(false);
@@ -448,6 +451,7 @@ const TrainSearchResults: React.FC = () => {
         pickup: { gaHanoi: false },
         dropoff: { gaDanang: false }
     });
+
 
     const trips: Trip[] = [
         {

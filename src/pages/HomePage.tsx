@@ -59,7 +59,7 @@ const HeroSection = () => {
         <h2 className="text-[36px] mb-[6px] font-semibold pt-[0px]">Bản đồ tuyến đường sắt Việt Nam</h2>
         <h3 className=" col-xs-12 no-padding  sub-title-internation mb-[24px] text-[18px]">Xem thông tin chi tiết về các tuyến tàu hỏa, lịch trình và điểm dừng</h3>
         <div className='bg-gray-100'>
-          <img alt="ivivu" className=" mx-auto w-[60%] " src="https://res.ivivu.com/train/images/banner/ivivu_ban_do_duong_sat.webp" />
+          <img alt="ivivu" className=" mx-auto container" src="https://res.ivivu.com/train/images/banner/ivivu_ban_do_duong_sat.webp" />
         </div>
         <div className=" bg-white pt-8"></div>
         <div className="container mx-auto px-4 "></div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useSearchParams } from 'react-router-dom';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 
@@ -11,15 +11,26 @@ import TrainSearchResults from '../Components/TrainSearchResults';
 
 
 const LayoutSearch: React.FC = () => {
-  const [from, setFrom] = useState("Hà Nội");
-  const [fromCode, setFromCode] = useState("HNO");
-  const [to, setTo] = useState("Lào Cai");
-  const [toCode, setToCode] = useState("LCA");
+  const [searchParams] = useSearchParams();
+  const from = searchParams.get("from") || ;
+  const to = searchParams.get("to");
+  const departureDate =new Date(searchParams.get("departureDate")||'');
+  const returnDate = new Date(searchParams.get("returnDate")||'');
+  const passengers = searchParams.get("passengers")?.toString() ?? '';
+  const roundTrip = searchParams.get("roundTrip") === "true";
+
+  console.log(searchParams)
   return (
     <>
    {/* <Layout/> */}
   
-      <BookingSearch/>
+      <BookingSearch   
+        from={from} 
+        to={to} 
+        departureDate={departureDate}
+        returnDate={returnDate}
+        passengers={passengers}
+        roundTrip={roundTrip}/>
       <TripTabs/>
       <TrainSearchResults/>
      </>
