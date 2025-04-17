@@ -16,7 +16,7 @@ const IconSwap = FaExchangeAlt as unknown as React.FC<React.SVGProps<SVGSVGEleme
 const IconCalendar = FaCalendarAlt as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconPassenger = FaUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 
-interface FormData {
+ export interface FormData {
   departure: { value: string; label: string } | null;
   destination: { value: string; label: string } | null;
   departureDate: Date;
@@ -82,7 +82,7 @@ const TrainBookingForm = () => {
     e.preventDefault();
     if (validateForm()) {
       const params = new URLSearchParams({
-        from: formData.departure?.value || '',
+        from: formData.departure?.value|| '',
         to: formData.destination?.value || '',
         departureDate: formData.departureDate.toISOString(),
         returnDate: formData.returnDate ? formData.returnDate.toISOString() : '',
