@@ -15,6 +15,7 @@ import LayoutSearch from './pages/LayoutSearch';
 import HeaderSelection from './Components/Popup/PopupSelectSeat';
 
 import SeatSelection from './Components/Popup/SeatSelection';
+import HeroSection from './pages/HomePage';
 
 
 
@@ -31,12 +32,14 @@ const App: React.FC = () => {
 
    
    <Routes>
-                <Route path="/" element={<Layout />} />
+                <Route path="/" element={<HeroSection />} />
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/signup" element={<SignupForm />} />
                 <Route path="/train-booking" element={<Layout />} />
                 <Route path="/train-search-results" element={<LayoutSearch />} />
-                <Route path ="/Train-selection" element={<HeaderSelection />} />
+                <Route path ="/train-selection" element={<HeaderSelection departure={''} arrival={''} date={''} trainName={''} seatTypes={[]} onCoachClick={function (coach: string): void {
+          throw new Error('Function not implemented.');
+        } } />} />
                 <Route path ="/1" element={   <SeatSelection coach={''} seats={[]}/>} />
             </Routes>
    <Footer/>

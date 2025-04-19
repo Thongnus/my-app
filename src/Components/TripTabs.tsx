@@ -1,95 +1,73 @@
-import React, { useState } from 'react';
-import { parse, format, addDays, subDays } from 'date-fns'; // Thêm date-fns để xử lý ngày tháng
+import React from 'react';
+import { provinces } from '../Data.js/provinces';
 
-const TripTabs = ({
-  from = 'Hà Nội, Việt Nam',
-  to = 'Lào Cai, Việt Nam',
-  returnFrom = 'Lào Cai, Việt Nam',
-  returnTo = 'Hà Nội, Việt Nam',
-  departDate = '08 April 2025, Tue', // Giá trị mặc định
-  returnDate = '09 April 2025, Wed', // Giá trị mặc định
+interface TripTabsProps {
+  from: string;
+  to: string;
+  returnFrom: string;
+  returnTo: string;
+  departDate: string;
+  returnDate: string | null;
+  roundTrip: boolean;
+}
+
+const TripTabs: React.FC<TripTabsProps> = ({
+  from,
+  to,
+  returnFrom,
+  returnTo,
+  departDate,
+  returnDate,
+  roundTrip,
 }) => {
-  const [activeTab, setActiveTab] = useState('depart');
-  const [departDateState, setDepartDateState] = useState(departDate); // Quản lý trạng thái ngày đi
-  const [returnDateState, setReturnDateState] = useState(returnDate); // Quản lý trạng thái ngày về
+  const fromStation = provinces.find((p) => p.value === from);
+  const toStation = provinces.find((p) => p.value === to);
+  const returnFromStation = provinces.find((p) => p.value === returnFrom);
+  const returnToStation = provinces.find((p) => p.value === returnTo);
 
-  // Hàm xử lý lùi ngày
-  const handlePreviousDay = (dateString: string, setDate: React.Dispatch<React.SetStateAction<string>>) => {
-    const date = parse(dateString, 'dd MMMM yyyy, EEE', new Date()); // Parse chuỗi ngày
-    const newDate = subDays(date, 1); // Lùi 1 ngày
-    const formattedDate = format(newDate, 'dd MMMM yyyy, EEE'); // Format lại
-    setDate(formattedDate);
-  };
+  const fromLabel = fromStation ? fromStation.label : from || 'N/A';
+  const toLabel = toStation ? toStation.label : to || 'N/A';
+  const returnFromLabel = returnFromStation ? returnFromStation.label : returnFrom || 'N/A';
+  const returnToLabel = returnToStation ? returnToStation.label : returnTo || 'N/A';
 
-  // Hàm xử lý tiến ngày
-  const handleNextDay = (dateString: string, setDate: React.Dispatch<React.SetStateAction<string>>) => {
-    const date = parse(dateString, 'dd MMMM yyyy, EEE', new Date()); // Parse chuỗi ngày
-    const newDate = addDays(date, 1); // Tiến 1 ngày
-    const formattedDate = format(newDate, 'dd MMMM yyyy, EEE'); // Format lại
-    setDate(formattedDate);
-  };
+  const showReturnTab = roundTrip && returnDate;
 
   return (
-    <div className="container  mx-auto px-4 py-6">
-      <div className="flex rounded-xl overflow-hidden shadow-md">
-        {/* Tab: Chiều đi */}
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex rounded-xl overflow-hidden shadow-md bg-[#303033] text-white">
         <div
-          onClick={() => setActiveTab('depart')}
-          className={`flex-1 px-4 py-4 cursor-pointer transition-all ${
-            activeTab === 'depart' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-700'
+          className={`px-6 py-5 bg-[#303033] text-white font-bold ${
+            showReturnTab ? 'flex-1' : 'w-full'
           }`}
         >
-          <div className="text-sm font-semibold mb-1">Điểm khởi hành</div>
-          <div className="text-base font-bold flex items-center gap-2">
-            <span className="truncate">{from}</span>
-            <i className="fa fa-long-arrow-right" />
-            <span className="truncate">{to}</span>
+          <div className="text-sm font-semibold mb-2">Chuyến đi</div>
+          <div className="text-lg flex items-center gap-3">
+            <span className="truncate">{fromLabel}</span>
+            <i className="fa fa-long-arrow-right text-gray-300" />
+            <span className="truncate">{toLabel}</span>
           </div>
-          <div className="mt-2 flex items-center justify-between text-sm">
-            <button onClick={() => handlePreviousDay(departDateState, setDepartDateState)} className="px-2">
-              <i className="fa fa-angle-left" />
-            </button>
-            <span>{departDateState}</span>
-            <button onClick={() => handleNextDay(departDateState, setDepartDateState)} className="px-2">
-              <i className="fa fa-angle-right" />
-            </button>
+          <div className="mt-3 text-sm">
+            <span>Ngày đi: {departDate}</span>
           </div>
         </div>
 
-        {/* Mũi tên chia */}
-        <div className="w-0 h-0 border-t-[50px] border-t-transparent border-b-[50px] border-b-transparent border-l-[15px] border-l-white"></div>
+        {showReturnTab && (
+          <>
+            <div className="w-0 h-0 border-t-[50px] border-t-transparent border-b-[50px] border-b-transparent border-l-[15px] border-l-gray-300 bg-[#303033]"></div>
 
-        {/* Tab: Chiều về */}
-        <div
-          onClick={() => setActiveTab('return')}
-          className={`flex-1 px-4 py-4 cursor-pointer transition-all ${
-            activeTab === 'return' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-700'
-          }`}
-        >
-          <div className="text-sm font-semibold mb-1">Điểm đến</div>
-          <div className="text-base font-bold flex items-center gap-2">
-            <span className="truncate">{returnFrom}</span>
-            <i className="fa fa-long-arrow-right" />
-            <span className="truncate">{returnTo}</span>
-          </div>
-          <div className="mt-2 flex items-center justify-between text-sm">
-            <button onClick={() => handlePreviousDay(returnDateState, setReturnDateState)} className="px-2">
-              <i className="fa fa-angle-left" />
-            </button>
-            <span>{returnDateState}</span>
-            <button onClick={() => handleNextDay(returnDateState, setReturnDateState)} className="px-2">
-              <i className="fa fa-angle-right" />
-            </button>
-          </div>
-          <div className="text-sm mt-2">
-            <a
-              href="#"
-              className="block text-red-400 text-xs underline mt-1 hover:text-red-600"
-            >
-              Không đặt chuyến về
-            </a>
-          </div>
-        </div>
+            <div className="flex-1 px-6 py-5 bg-[#303033] text-white font-bold">
+              <div className="text-sm font-semibold mb-2">Chuyến về</div>
+              <div className="text-lg flex items-center gap-3">
+                <span className="truncate">{returnFromLabel}</span>
+                <i className="fa fa-long-arrow-right text-gray-300" />
+                <span className="truncate">{returnToLabel}</span>
+              </div>
+              <div className="mt-3 text-sm">
+                <span>Ngày về: {returnDate}</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
