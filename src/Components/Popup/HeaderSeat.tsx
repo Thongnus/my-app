@@ -1,4 +1,3 @@
-// Header.tsx
 import React from 'react';
 
 // Define the types for seat data
@@ -28,7 +27,7 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
 }) => {
   return (
     <div className="bg-white shadow-md">
-      {/* Top Section: Route Info, Train Name, Close Button */}
+      {/* Top Section: Route Info, Train Name */}
       <div className="grid grid-cols-12 p-4 items-center">
         <div className="col-span-4 flex items-center">
           <div className="text-lg font-medium">
@@ -39,13 +38,6 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
         </div>
         <div className="col-span-4 text-center text-xl font-semibold">
           {trainName}
-        </div>
-        <div className="col-span-4 flex justify-end">
-          <img
-            src="https://res.ivivu.com/train/images/icon/ic_close.svg"
-            alt="close"
-            className="w-6 h-6 object-contain cursor-pointer" // Fixed h-42 to h-6
-          />
         </div>
       </div>
 
@@ -95,4 +87,4 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
   );
 };
 
-export default HeaderSelectionPopup; 
+export default HeaderSelectionPopup;

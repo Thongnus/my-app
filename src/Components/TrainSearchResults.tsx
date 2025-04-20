@@ -549,11 +549,18 @@ const TripDetailsModal: React.FC<{
   </div>
 );
 
-const TrainSearchResults: React.FC = () => {
+interface TrainSearchResultsProps {
+  setSelectedOutboundTrip: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string } | null>>;
+  setTripDirection: React.Dispatch<React.SetStateAction<'outbound' | 'return'>>;
+  tripDirection: 'outbound' | 'return';
+}
+
+const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutboundTrip, setTripDirection, tripDirection }) => {
   const [searchParams] = useSearchParams();
   const from = searchParams.get("from") || '';
   const to = searchParams.get("to") || '';
   const departureDate = searchParams.get("departureDate") || '';
+  const returnDate = searchParams.get("returnDate") || '';
 
   const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details');
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
@@ -572,8 +579,10 @@ const TrainSearchResults: React.FC = () => {
   const toStation = provinces.find((p) => p.value === to);
   const fromLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A';
   const toLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A';
+  const returnFromLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A';
+  const returnToLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A';
 
-  const trips: Trip[] = [
+  const outboundTrips: Trip[] = [
     {
       id: "VN-int-int-3382-1496266-3044-2023-3048-2020-202504101950-3286-0e1e3f4c-06f5-46e4-800a-c5bad5ea4269",
       departureTime: "07:50 PM",
@@ -692,6 +701,97 @@ const TrainSearchResults: React.FC = () => {
     },
   ];
 
+  const returnTrips: Trip[] = [
+    {
+      id: "VN-int-int-1111-2222222-20250420-3333-abcd1111-4444-5555-efgh2222",
+      departureTime: "06:00 PM",
+      duration: "16 hr 45 min*",
+      bedsAvailable: 22,
+      arrivalTime: "10:45",
+      fromStation: "Ga Đà Nẵng",
+      fromCity: "Đà Nẵng",
+      toStation: "Ga Hà Nội",
+      toCity: "Hà Nội",
+      operator: "LOTUS TRAIN",
+      trainName: "SE8",
+      coachType: "B",
+      coachName: "SE8: ĐÀ NẴNG - HÀ NỘI 18:00",
+      adultPrice: "3.300.000",
+      childPrice: "3.300.000",
+      amenities: { wifi: true, food: true },
+      isLuxury: true,
+      fromAddress: "Ga Đà Nẵng",
+      toAddress: "Ga Hà Nội",
+      departureDate: "2025-04-20",
+    },
+    {
+      id: "VN-int-int-2222-3333333-20250420-4444-abcd2222-5555-6666-efgh3333",
+      departureTime: "08:00 PM",
+      duration: "17 hr 00 min*",
+      bedsAvailable: 26,
+      arrivalTime: "13:00",
+      fromStation: "Ga Đà Nẵng",
+      fromCity: "Đà Nẵng",
+      toStation: "Ga Hà Nội",
+      toCity: "Hà Nội",
+      operator: "LIVITRANS",
+      trainName: "SE10",
+      coachType: "B",
+      coachName: "SE10: ĐÀ NẴNG - HÀ NỘI 20:00",
+      adultPrice: "2.100.000",
+      childPrice: "2.100.000",
+      amenities: { wifi: true, powerPlug: true, food: true },
+      isLuxury: false,
+      fromAddress: "Ga Đà Nẵng",
+      toAddress: "Ga Hà Nội",
+      departureDate: "2025-04-20",
+    },
+    {
+      id: "VN-int-int-3333-4444444-20250420-5555-abcd3333-6666-7777-efgh4444",
+      departureTime: "09:30 PM",
+      duration: "16 hr 30 min*",
+      bedsAvailable: 20,
+      arrivalTime: "14:00",
+      fromStation: "Ga Đà Nẵng",
+      fromCity: "Đà Nẵng",
+      toStation: "Ga Hà Nội",
+      toCity: "Hà Nội",
+      operator: "LOTUS TRAIN",
+      trainName: "SE12",
+      coachType: "B",
+      coachName: "SE12: ĐÀ NẴNG - HÀ NỘI 21:30",
+      adultPrice: "3.500.000",
+      childPrice: "3.500.000",
+      amenities: { wifi: true, food: true, tv: true },
+      isLuxury: true,
+      fromAddress: "Ga Đà Nẵng",
+      toAddress: "Ga Hà Nội",
+      departureDate: "2025-04-20",
+    },
+    {
+      id: "VN-int-int-3333-4444444-20250420-5555-abcd3333-6666-7777-efgh4444",
+      departureTime: "09:30 PM",
+      duration: "16 hr 30 min*",
+      bedsAvailable: 20,
+      arrivalTime: "14:00",
+      fromStation: "Ga Đà Nẵng",
+      fromCity: "Đà Nẵng",
+      toStation: "Ga Hà Nội",
+      toCity: "Hà Nội",
+      operator: "LOTUS TRAIN",
+      trainName: "SE12",
+      coachType: "B",
+      coachName: "SE12: ĐÀ NẴNG - HÀ NỘI 21:30",
+      adultPrice: "3.500.000",
+      childPrice: "3.500.000",
+      amenities: { wifi: true, food: true, tv: true },
+      isLuxury: true,
+      fromAddress: "Ga Đà Nẵng",
+      toAddress: "Ga Hà Nội",
+      departureDate: "2025-04-28",
+    },
+  ];
+
   const generateSeatTypes = (trip: Trip): SeatType[] => {
     const coachCount = 6;
     const seatTypes: SeatType[] = [];
@@ -709,7 +809,9 @@ const TrainSearchResults: React.FC = () => {
     return seatTypes;
   };
 
-  const filteredTrips = trips.filter((trip) => {
+  const tripsToShow = tripDirection === 'outbound' ? outboundTrips : returnTrips;
+
+  const filteredTrips = tripsToShow.filter((trip) => {
     const departureTime = trip.departureTime;
     const [hourStr, period] = departureTime.split(' ');
     let hour = parseInt(hourStr.split(':')[0]);
@@ -739,10 +841,17 @@ const TrainSearchResults: React.FC = () => {
       (!filters.amenities.tv || trip.amenities.tv) &&
       (!filters.amenities.wifi || trip.amenities.wifi);
 
-    const fromMatch = from ? trip.fromCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true;
-    const toMatch = to ? trip.toCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true;
+    const fromMatch = tripDirection === 'outbound'
+      ? (from ? trip.fromCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true)
+      : (to ? trip.fromCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true);
 
-    const searchDate = departureDate ? new Date(departureDate).toISOString().split('T')[0] : '';
+    const toMatch = tripDirection === 'outbound'
+      ? (to ? trip.toCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true)
+      : (from ? trip.toCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true);
+
+    const searchDate = tripDirection === 'outbound'
+      ? (departureDate ? new Date(departureDate).toISOString().split('T')[0] : '')
+      : (returnDate ? new Date(returnDate).toISOString().split('T')[0] : '');
     const dateMatch = searchDate ? trip.departureDate === searchDate : true;
 
     const pickupMatch = !filters.pickup.gaHanoi || trip.fromStation === 'Ga Hà Nội';
@@ -777,6 +886,17 @@ const TrainSearchResults: React.FC = () => {
     setSelectedTripForSeats(null);
   };
 
+  const handleContinueToReturnTrip = () => {
+    if (selectedTripForSeats) {
+      setSelectedOutboundTrip({
+        operator: selectedTripForSeats.operator,
+        departureTime: selectedTripForSeats.departureTime,
+      });
+      setTripDirection('return');
+      closeSeatSelectionPopup();
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row gap-6">
@@ -791,9 +911,13 @@ const TrainSearchResults: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{fromLabel}</span>
+                <span className="font-semibold">
+                  {tripDirection === 'outbound' ? fromLabel : returnFromLabel}
+                </span>
                 <CFaLongArrowAltRight />
-                <span className="font-semibold">{toLabel}</span>
+                <span className="font-semibold">
+                  {tripDirection === 'outbound' ? toLabel : returnToLabel}
+                </span>
               </div>
               <button className="md:hidden">
                 <CFaEdit />
@@ -848,14 +972,16 @@ const TrainSearchResults: React.FC = () => {
 
       {showSeatSelectionPopup && selectedTripForSeats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <HeaderSelection
-                departure={selectedTripForSeats.fromStation}
-                arrival={selectedTripForSeats.toStation}
-                date={selectedTripForSeats.departureDate.split('-').reverse().join('/')}
-                trainName={selectedTripForSeats.trainName || selectedTripForSeats.coachName}
-                seatTypes={generateSeatTypes(selectedTripForSeats)}
-                onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
-              />
+          <HeaderSelection
+            departure={selectedTripForSeats.fromStation}
+            arrival={selectedTripForSeats.toStation}
+            date={selectedTripForSeats.departureDate.split('-').reverse().join('/')}
+            trainName={selectedTripForSeats.trainName || selectedTripForSeats.coachName}
+            seatTypes={generateSeatTypes(selectedTripForSeats)}
+            onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
+            onClose={closeSeatSelectionPopup}
+            onContinue={handleContinueToReturnTrip}
+          />
         </div>
       )}
     </div>

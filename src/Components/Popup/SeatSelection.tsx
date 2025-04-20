@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export interface Seat {
   seatNumber: string;
@@ -14,6 +15,11 @@ export interface SeatSelectionProps {
   onSeatClick?: (seatNumber: string) => void;
   totalAvailableSeats?: number;
   onContinue?: () => void;
+  onBook?: (selectedSeats: string[]) => void; // Thêm prop onBook để xử lý đặt vé
+  departure?: string; // Thêm thông tin chuyến tàu để log
+  arrival?: string;
+  date?: string;
+  trainName?: string;
 }
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({
@@ -22,8 +28,18 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   onSeatClick,
   totalAvailableSeats = 0,
   onContinue,
+  onBook,
+  departure,
+  arrival,
+  date,
+  trainName,
 }) => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+
+  // Lấy query parameter từ URL
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const roundTrip = queryParams.get("roundTrip") === "true";
 
   const handleSeatClick = (seatNumber: string) => {
     if (selectedSeats.includes(seatNumber)) {
@@ -32,6 +48,32 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
       setSelectedSeats([...selectedSeats, seatNumber]);
     }
     onSeatClick?.(seatNumber);
+  };
+
+  const handleButtonClick = () => {
+    if (roundTrip) {
+      // Nếu là roundTrip, gọi onContinue để tiếp tục chọn chuyến về
+      onContinue?.();
+    } else {
+      // Nếu không phải roundTrip, xử lý đặt vé
+      if (selectedSeats.length === 0) {
+        alert("Vui lòng chọn ít nhất một ghế trước khi đặt vé!");
+        return;
+      }
+
+      // Log thông tin đặt vé (tạm thời)
+      console.log("Thông tin đặt vé:", {
+        departure,
+        arrival,
+        date,
+        trainName,
+        coach,
+        selectedSeats,
+      });
+
+      // Gọi onBook nếu được truyền, để xử lý đặt vé (dành cho tích hợp trang thanh toán sau này)
+      onBook?.(selectedSeats);
+    }
   };
 
   const coachNumber = parseInt(coach.replace("Toa ", ""));
@@ -222,13 +264,19 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
       </div>
       <div className="flex justify-end mt-6">
         <button
-          onClick={onContinue}
+          onClick={handleButtonClick}
           className="bg-orange-500 text-white px-6 py-2 sm:px-4 sm:py-1.5 rounded-lg flex items-center text-sm sm:text-xs hover:bg-orange-600 transition-colors cursor-pointer"
         >
-          Tiếp tục chọn chuyến về
-          <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-          </svg>
+          {roundTrip ? "Tiếp tục chọn chuyến về" : "Đặt vé"}
+          {roundTrip ? (
+            <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          )}
         </button>
       </div>
     </div>
