@@ -1,71 +1,77 @@
 import React from 'react';
 
-// Define the types for seat data
+// Định nghĩa kiểu dữ liệu cho thông tin toa (coach) của tàu
 export interface SeatType {
-  coach: string; // e.g., "Toa 1"
-  type: string; // e.g., "Ngồi mềm điều hòa"
-  availability: number; // e.g., 11
-  price: string; // e.g., "333K" or "572K - 664K"
+  coach: string; // Tên toa, ví dụ: "Toa 1", "Toa 2",...
+  type: string; // Loại toa, ví dụ: "Ngồi mềm điều hòa" hoặc "Giường nằm khoang 6 điều hòa"
+  availability: number; // Số ghế còn trống trong toa, ví dụ: 11 ghế
+  price: string; // Giá vé, ví dụ: "333K" hoặc "572K - 664K" (khoảng giá nếu có nhiều loại ghế trong toa)
 }
 
+// Định nghĩa kiểu dữ liệu cho các props của component HeaderSelectionPopup
 export interface HeaderProps {
-  departure: string;
-  arrival: string;
-  date: string;
-  trainName: string;
-  seatTypes: SeatType[];
-  onCoachClick?: (coach: string) => void; // Callback for coach click
+  departure: string; // Điểm khởi hành, ví dụ: "Ga Hà Nội"
+  arrival: string; // Điểm đến, ví dụ: "Ga Đà Nẵng"
+  date: string; // Ngày đi, ví dụ: "10/04/2025"
+  trainName: string; // Tên tàu hoặc mã tàu, ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin"
+  seatTypes: SeatType[]; // Danh sách các toa của tàu, mỗi toa có thông tin như trên
+  onCoachClick?: (coach: string) => void; // Hàm callback khi người dùng click vào một toa, truyền tên toa (ví dụ: "Toa 1")
 }
 
 const HeaderSelectionPopup: React.FC<HeaderProps> = ({
-  departure,
-  arrival,
-  date,
-  trainName,
-  seatTypes,
-  onCoachClick,
+  departure, // Điểm khởi hành
+  arrival, // Điểm đến
+  date, // Ngày đi
+  trainName, // Tên tàu
+  seatTypes, // Danh sách các toa
+  onCoachClick, // Hàm xử lý khi người dùng chọn toa
 }) => {
   return (
     <div className="bg-white shadow-md">
-      {/* Top Section: Route Info, Train Name */}
+      {/* Phần trên: Hiển thị thông tin lộ trình và tên tàu */}
       <div className="grid grid-cols-12 p-4 items-center">
+        {/* Cột 1: Hiển thị lộ trình (điểm đi → điểm đến) và ngày đi */}
         <div className="col-span-4 flex items-center">
           <div className="text-lg font-medium">
-            <span>{departure}</span>
-            <span className="mx-2">→</span>
-            <span>{arrival} | {date}</span>
+            <span>{departure}</span> {/* Ví dụ: "Ga Hà Nội" */}
+            <span className="mx-2">→</span> {/* Mũi tên phân cách */}
+            <span>{arrival} | {date}</span> {/* Ví dụ: "Ga Đà Nẵng | 10/04/2025" */}
           </div>
         </div>
+        {/* Cột 2: Hiển thị tên tàu (ở giữa) */}
         <div className="col-span-4 text-center text-xl font-semibold">
-          {trainName}
+          {trainName} {/* Ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin" */}
         </div>
+        {/* Cột 3: Để trống (có thể dùng sau này để thêm nút hoặc thông tin khác) */}
       </div>
 
-      {/* Train Coaches Section */}
+      {/* Phần dưới: Hiển thị danh sách các toa của tàu */}
       <div className="p-4">
         <div className="flex items-flex items-center justify-end p-4">
-          {/* Scrollable Coaches Container */}
+          {/* Container chứa danh sách toa, có thể cuộn ngang nếu nhiều toa */}
           <div className="flex overflow-x-auto overflow-y-hidden scrollbar-hide">
-            {/* Coaches in reverse order (Toa 9 to Toa 1) */}
+            {/* Hiển thị danh sách toa theo thứ tự ngược (từ Toa 9 đến Toa 1) */}
             {seatTypes.slice().reverse().map((seat, index) => (
               <div
-                key={index}
+                key={index} // Key để React nhận diện từng phần tử trong danh sách
                 className="flex-shrink-0 w-48 h-24 bg-gray-100 border border-gray-300 rounded-l-lg flex items-center justify-between px-3 mr-1 last:mr-0 relative cursor-pointer hover:bg-gray-200"
-                onClick={() => onCoachClick?.(seat.coach)} // Trigger callback on click
+                onClick={() => onCoachClick?.(seat.coach)} // Khi click vào toa, gọi hàm onCoachClick và truyền tên toa (ví dụ: "Toa 1")
               >
-                {/* Coach Info */}
+                {/* Thông tin toa */}
                 <div className="overflow-hidden">
+                  {/* Tên toa và loại toa */}
                   <div className="text-base font-medium whitespace-nowrap">
-                    {seat.coach}: {seat.type}
+                    {seat.coach}: {seat.type} {/* Ví dụ: "Toa 1: Ngồi mềm điều hòa" */}
                   </div>
+                  {/* Số chỗ còn trống và giá vé */}
                   <div className="text-sm text-gray-500 whitespace-nowrap">
-                    <span>Còn {seat.availability} chỗ | </span>
+                    <span>Còn {seat.availability} chỗ | </span> {/* Ví dụ: "Còn 11 chỗ" */}
                     <span>
-                      Giá {seat.price.includes('-') ? 'từ' : 'chỉ'} {seat.price}
+                      Giá {seat.price.includes('-') ? 'từ' : 'chỉ'} {seat.price} {/* Ví dụ: "Giá chỉ 333K" hoặc "Giá từ 572K - 664K" */}
                     </span>
                   </div>
                 </div>
-                {/* Right border to connect coaches visually */}
+                {/* Thanh nối giữa các toa (trừ toa cuối cùng) */}
                 {index !== seatTypes.length - 1 && (
                   <div className="absolute right-0 h-12 w-1 bg-gray-300"></div>
                 )}
@@ -73,7 +79,7 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
             ))}
           </div>
 
-          {/* Train Head (Nose) */}
+          {/* Hình ảnh đầu tàu (biểu tượng tàu hỏa) */}
           <div className="flex-shrink-0">
             <img
               src="https://res.ivivu.com/train/images/trainlist/head-train-desktop.svg"

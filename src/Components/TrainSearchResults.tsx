@@ -10,11 +10,12 @@ import {
   FaCaretUp,
   FaInfoCircle,
   FaTimes,
-} from 'react-icons/fa';
-import { useSearchParams } from 'react-router-dom';
-import { provinces } from '../Data.js/provinces';
-import HeaderSelection from './Popup/PopupSelectSeat';
+} from 'react-icons/fa'; // Các icon từ thư viện react-icons
+import { useSearchParams } from 'react-router-dom'; // Hook để lấy query parameters từ URL
+import { provinces } from '../Data.js/provinces'; // Danh sách ga (provinces), định dạng: { value: string, label: string }
+import HeaderSelection from './Popup/PopupSelectSeat'; // Component popup để chọn ghế
 
+// Ép kiểu các icon từ Fa* thành React component để sử dụng trong JSX
 const CFaTimes = FaTimes as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaInfoCircle = FaInfoCircle as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaSort = FaSort as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -26,110 +27,140 @@ const CFaSlidersH = FaSlidersH as unknown as React.FC<React.SVGProps<SVGSVGEleme
 const CFaCaretDown = FaCaretDown as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaCaretUp = FaCaretUp as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 
+// Định nghĩa kiểu dữ liệu cho một chuyến tàu
 interface Trip {
-  id: string;
-  departureTime: string;
-  duration: string;
-  bedsAvailable: number;
-  arrivalTime: string;
-  fromStation: string;
-  fromCity: string;
-  toStation: string;
-  toCity: string;
-  operator: string;
-  trainName: string;
-  coachType: string;
-  coachName: string;
-  adultPrice: string;
-  childPrice: string;
+  id: string; // ID của chuyến tàu, ví dụ: "VN-int-int-3382-..."
+  departureTime: string; // Giờ khởi hành, ví dụ: "07:50 PM"
+  duration: string; // Thời gian di chuyển, ví dụ: "17 hr 11 min*"
+  bedsAvailable: number; // Số giường còn trống, ví dụ: 16
+  arrivalTime: string; // Giờ đến, ví dụ: "13:01"
+  fromStation: string; // Ga khởi hành, ví dụ: "Ga Hà Nội"
+  fromCity: string; // Thành phố khởi hành, ví dụ: "Hà Nội"
+  toStation: string; // Ga đến, ví dụ: "Ga Đà Nẵng"
+  toCity: string; // Thành phố đến, ví dụ: "Đà Nẵng"
+  operator: string; // Nhà điều hành, ví dụ: "LOTUS TRAIN"
+  trainName: string; // Tên tàu, ví dụ: "SE19"
+  coachType: string; // Loại toa, ví dụ: "B"
+  coachName: string; // Tên toa, ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin"
+  adultPrice: string; // Giá vé người lớn, ví dụ: "3.600.000"
+  childPrice: string; // Giá vé trẻ em, ví dụ: "3.600.000"
   amenities: {
-    wifi?: boolean;
-    powerPlug?: boolean;
-    food?: boolean;
-    tv?: boolean;
-    massageChair?: boolean;
+    wifi?: boolean; // Có WiFi không
+    powerPlug?: boolean; // Có ổ cắm không
+    food?: boolean; // Có đồ ăn không
+    tv?: boolean; // Có TV không
+    massageChair?: boolean; // Có ghế massage không
   };
-  isLuxury: boolean;
-  fromAddress?: string;
-  toAddress?: string;
-  fromLatitude?: number;
-  fromLongitude?: number;
-  departureDate: string;
+  isLuxury: boolean; // Có phải tàu cao cấp không
+  fromAddress?: string; // Địa chỉ ga đi, ví dụ: "Ga Hà Nội"
+  toAddress?: string; // Địa chỉ ga đến, ví dụ: "Ga Đà Nẵng"
+  fromLatitude?: number; // Vĩ độ ga đi, ví dụ: 21.025062
+  fromLongitude?: number; // Kinh độ ga đi, ví dụ: 105.841181
+  departureDate: string; // Ngày khởi hành, ví dụ: "2025-04-10"
 }
 
+// Định nghĩa kiểu dữ liệu cho thông tin toa (dùng trong popup chọn ghế)
 interface SeatType {
-  coach: string;
-  type: string;
-  availability: number;
-  price: string;
+  coach: string; // Tên toa, ví dụ: "Toa 1"
+  type: string; // Loại toa, ví dụ: "Ngồi mềm điều hòa"
+  availability: number; // Số ghế còn trống, ví dụ: 16
+  price: string; // Giá vé, ví dụ: "3600K"
 }
 
-type TimeFilter = { morning: boolean; afternoon: boolean; evening: boolean; all: boolean };
-type OperatorFilter = { livitrans: boolean; newLivitrans: boolean; lotusTrain: boolean; all: boolean };
-type FilterTypes = {
-  time: TimeFilter;
-  operator: OperatorFilter;
-  amenities: Record<string, boolean>;
-  pickup: Record<string, boolean>;
-  dropoff: Record<string, boolean>;
+// Định nghĩa kiểu dữ liệu cho bộ lọc thời gian
+type TimeFilter = {
+  morning: boolean; // Lọc chuyến sáng (00:00 AM - 11:59 AM)
+  afternoon: boolean; // Lọc chuyến chiều (12:00 PM - 06:59 PM)
+  evening: boolean; // Lọc chuyến tối (07:00 PM - 11:59 PM)
+  all: boolean; // Chọn tất cả thời gian
 };
 
+// Định nghĩa kiểu dữ liệu cho bộ lọc nhà điều hành
+type OperatorFilter = {
+  livitrans: boolean; // Lọc nhà điều hành LIVITRANS
+  newLivitrans: boolean; // Lọc nhà điều hành New Livitrans
+  lotusTrain: boolean; // Lọc nhà điều hành LOTUS TRAIN
+  all: boolean; // Chọn tất cả nhà điều hành
+};
+
+// Định nghĩa kiểu dữ liệu cho tất cả bộ lọc
+type FilterTypes = {
+  time: TimeFilter; // Bộ lọc thời gian
+  operator: OperatorFilter; // Bộ lọc nhà điều hành
+  amenities: Record<string, boolean>; // Bộ lọc tiện nghi (wifi, food,...)
+  pickup: Record<string, boolean>; // Bộ lọc điểm đón
+  dropoff: Record<string, boolean>; // Bộ lọc điểm trả
+};
+
+// Component thanh lọc (FilterSidebar) để người dùng lọc chuyến tàu
 const FilterSidebar: React.FC<{
-  filters: FilterTypes;
-  setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>;
-  showFilters: boolean;
-  setShowFilters: React.Dispatch<React.SetStateAction<boolean>>;
-  resetFilters: () => void;
+  filters: FilterTypes; // Trạng thái bộ lọc hiện tại
+  setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>; // Hàm cập nhật bộ lọc
+  showFilters: boolean; // Hiển thị bộ lọc trên mobile
+  setShowFilters: React.Dispatch<React.SetStateAction<boolean>>; // Hàm cập nhật trạng thái hiển thị bộ lọc
+  resetFilters: () => void; // Hàm reset bộ lọc về mặc định
 }> = ({ filters, setFilters, showFilters, setShowFilters, resetFilters }) => {
+  // Xử lý thay đổi bộ lọc (khi người dùng chọn/bỏ chọn checkbox)
   const handleFilterChange = (filterType: keyof FilterTypes, filterKey: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = { ...prev }; // Sao chép bộ lọc hiện tại
 
+      // Xử lý bộ lọc thời gian
       if (filterType === 'time') {
         const timeFilter = { ...newFilters.time };
         if (filterKey === 'all') {
+          // Nếu chọn "Tất cả", bỏ chọn các khoảng thời gian khác
           timeFilter.morning = false;
           timeFilter.afternoon = false;
           timeFilter.evening = false;
           timeFilter.all = true;
         } else {
+          // Nếu chọn một khoảng thời gian cụ thể, bỏ chọn "Tất cả"
           timeFilter[filterKey as keyof TimeFilter] = !timeFilter[filterKey as keyof TimeFilter];
           timeFilter.all = !(timeFilter.morning || timeFilter.afternoon || timeFilter.evening);
         }
         newFilters.time = timeFilter;
-      } else if (filterType === 'operator') {
+      } 
+      // Xử lý bộ lọc nhà điều hành
+      else if (filterType === 'operator') {
         const operatorFilter = { ...newFilters.operator };
         if (filterKey === 'all') {
+          // Nếu chọn "Tất cả", bỏ chọn các nhà điều hành khác
           operatorFilter.livitrans = false;
           operatorFilter.newLivitrans = false;
           operatorFilter.lotusTrain = false;
           operatorFilter.all = true;
         } else {
+          // Nếu chọn một nhà điều hành cụ thể, bỏ chọn "Tất cả"
           operatorFilter[filterKey as keyof OperatorFilter] = !operatorFilter[filterKey as keyof OperatorFilter];
           operatorFilter.all = !(operatorFilter.livitrans || operatorFilter.newLivitrans || operatorFilter.lotusTrain);
         }
         newFilters.operator = operatorFilter;
-      } else {
+      } 
+      // Xử lý các bộ lọc khác (amenities, pickup, dropoff)
+      else {
         const otherFilter = { ...newFilters[filterType] };
-        otherFilter[filterKey] = !otherFilter[filterKey];
+        otherFilter[filterKey] = !otherFilter[filterKey]; // Đảo trạng thái của bộ lọc
         newFilters[filterType] = otherFilter;
       }
 
-      return newFilters;
+      return newFilters; // Trả về bộ lọc mới
     });
   };
 
   return (
     <div className="w-full md:w-1/4">
       <div className="bg-white rounded-lg shadow-md p-4">
+        {/* Nút hiển thị bộ lọc trên mobile */}
         <div className="md:hidden mb-4">
           <button
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => setShowFilters(!showFilters)} // Hiển thị/ẩn bộ lọc trên mobile
             className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded"
           >
             <CFaSlidersH /> <span>Lọc</span>
           </button>
         </div>
+        {/* Nội dung bộ lọc, ẩn trên mobile nếu không bật showFilters */}
         <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
           <div className="border-b pb-4 mb-4">
             <div className="flex justify-between items-center">
@@ -140,6 +171,7 @@ const FilterSidebar: React.FC<{
             </div>
           </div>
 
+          {/* Bộ lọc thời gian khởi hành */}
           <div className="mb-6">
             <h4 className="font-semibold">Thời gian khởi hành</h4>
             <ul className="mt-2 space-y-2">
@@ -186,6 +218,7 @@ const FilterSidebar: React.FC<{
             </ul>
           </div>
 
+          {/* Bộ lọc nhà điều hành */}
           <div className="mb-6">
             <h4 className="font-semibold">Nhà Tàu (Công ty)</h4>
             <ul className="mt-2 space-y-2">
@@ -232,6 +265,7 @@ const FilterSidebar: React.FC<{
             </ul>
           </div>
 
+          {/* Bộ lọc tiện nghi */}
           <div className="mb-6">
             <h4 className="font-semibold">Tiện nghi</h4>
             <ul className="mt-2 space-y-2">
@@ -288,6 +322,7 @@ const FilterSidebar: React.FC<{
             </ul>
           </div>
 
+          {/* Nút reset bộ lọc */}
           <div className="text-center">
             <button onClick={resetFilters} className="bg-purple-600 text-white px-4 py-2 rounded">
               Đặt lại bộ lọc
@@ -299,15 +334,22 @@ const FilterSidebar: React.FC<{
   );
 };
 
-const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void; onSelectTrip: (trip: Trip) => void }> = ({ trip, openTripDetails, onSelectTrip }) => (
+// Component hiển thị thông tin một chuyến tàu (TripCard)
+const TripCard: React.FC<{
+  trip: Trip; // Thông tin chuyến tàu
+  openTripDetails: (trip: Trip) => void; // Hàm mở modal chi tiết chuyến
+  onSelectTrip: (trip: Trip) => void; // Hàm xử lý khi chọn chuyến (mở popup chọn ghế)
+}> = ({ trip, openTripDetails, onSelectTrip }) => (
   <div className="border rounded-lg overflow-hidden">
     <div className="grid grid-cols-12 gap-4 p-4">
+      {/* Cột 1: Giờ khởi hành, thời gian di chuyển, giờ đến */}
       <div className="col-span-12 md:col-span-2">
         <div className="font-bold text-lg">{trip.departureTime}</div>
         <div className="text-sm text-gray-500">{trip.duration}</div>
         <div className="md:hidden text-sm mt-1">• {trip.bedsAvailable} Giường</div>
         <div className="text-sm text-gray-500">Arrival Time: {trip.arrivalTime}</div>
       </div>
+      {/* Cột 2: Tuyến đường (ga đi → ga đến) */}
       <div className="col-span-12 md:col-span-5">
         <div className="grid grid-cols-12 gap-2">
           <div className="col-span-5">
@@ -323,16 +365,19 @@ const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void; on
           </div>
         </div>
       </div>
+      {/* Cột 3: Số giường còn trống (ẩn trên mobile) */}
       <div className="hidden md:col-span-1 md:flex items-center">{trip.bedsAvailable} Giường</div>
+      {/* Cột 4: Giá vé */}
       <div className="col-span-12 md:col-span-2 flex flex-col md:flex-row md:items-center md:justify-end gap-2">
         <div className="flex items-center gap-1">
           <span className="font-medium">VND {trip.adultPrice}</span>
           <CFaAngleDown />
         </div>
       </div>
+      {/* Cột 5: Nút chọn chuyến */}
       <div className="col-span-12 md:col-span-2 flex justify-end">
         <button
-          onClick={() => onSelectTrip(trip)}
+          onClick={() => onSelectTrip(trip)} // Mở popup chọn ghế
           className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
         >
           Chọn
@@ -340,6 +385,7 @@ const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void; on
       </div>
     </div>
     <div className="bg-gray-50 p-4 grid grid-cols-12 gap-4">
+      {/* Logo nhà điều hành */}
       <div className="col-span-12 md:col-span-2 flex items-center">
         <img
           src={`https://www.easybook.com/images/train/${
@@ -349,10 +395,12 @@ const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void; on
           className="h-12"
         />
       </div>
+      {/* Thông tin nhà điều hành, tên tàu, tên toa */}
       <div className="col-span-12 md:col-span-7">
         <div className="font-medium">
           {trip.operator} • Train {trip.trainName} • Coach {trip.coachName}
         </div>
+        {/* Hiển thị tiện nghi */}
         <div className="flex gap-2 mt-1">
           {trip.amenities.wifi && (
             <div className="relative group">
@@ -401,6 +449,7 @@ const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void; on
           )}
         </div>
       </div>
+      {/* Nút xem chi tiết chuyến */}
       <div className="col-span-12 md:col-span-3 flex justify-end items-center">
         <button onClick={() => openTripDetails(trip)} className="text-purple-600 text-sm">
           Hình ảnh | Chi tiết
@@ -410,11 +459,12 @@ const TripCard: React.FC<{ trip: Trip; openTripDetails: (trip: Trip) => void; on
   </div>
 );
 
+// Component modal hiển thị chi tiết chuyến tàu
 const TripDetailsModal: React.FC<{
-  selectedTrip: Trip;
-  activeTab: 'details' | 'operator';
-  setActiveTab: React.Dispatch<React.SetStateAction<'details' | 'operator'>>;
-  closeModal: () => void;
+  selectedTrip: Trip; // Chuyến tàu được chọn
+  activeTab: 'details' | 'operator'; // Tab hiện tại: "details" hoặc "operator"
+  setActiveTab: React.Dispatch<React.SetStateAction<'details' | 'operator'>>; // Hàm cập nhật tab
+  closeModal: () => void; // Hàm đóng modal
 }> = ({ selectedTrip, activeTab, setActiveTab, closeModal }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -425,6 +475,7 @@ const TripDetailsModal: React.FC<{
             <CFaTimes />
           </button>
         </div>
+        {/* Tabs: Trip Details và Operator Info */}
         <div className="mb-4 border-b">
           <div className="flex space-x-4">
             <button
@@ -445,6 +496,7 @@ const TripDetailsModal: React.FC<{
             </button>
           </div>
         </div>
+        {/* Tab Trip Details */}
         {activeTab === 'details' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -522,6 +574,7 @@ const TripDetailsModal: React.FC<{
                 </tbody>
               </table>
             </div>
+            {/* Bản đồ (nếu có tọa độ) */}
             {selectedTrip.fromLatitude && selectedTrip.fromLongitude && (
               <div>
                 <div className="bg-green-50 p-3 mb-4">
@@ -534,6 +587,7 @@ const TripDetailsModal: React.FC<{
             )}
           </div>
         )}
+        {/* Tab Operator Info */}
         {activeTab === 'operator' && (
           <div className="mt-4">
             <h1 className="text-xl font-bold">{selectedTrip.operator}</h1>
@@ -549,39 +603,45 @@ const TripDetailsModal: React.FC<{
   </div>
 );
 
+// Định nghĩa kiểu dữ liệu cho props của component TrainSearchResults
 interface TrainSearchResultsProps {
-  setSelectedOutboundTrip: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string } | null>>;
-  setTripDirection: React.Dispatch<React.SetStateAction<'outbound' | 'return'>>;
-  tripDirection: 'outbound' | 'return';
+  setSelectedOutboundTrip: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string } | null>>; // Hàm lưu chuyến đi đã chọn
+  setTripDirection: React.Dispatch<React.SetStateAction<'outbound' | 'return'>>; // Hàm cập nhật hướng chuyến (outbound/return)
+  tripDirection: 'outbound' | 'return'; // Hướng chuyến hiện tại
 }
 
+// Component chính: TrainSearchResults
 const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutboundTrip, setTripDirection, tripDirection }) => {
+  // Lấy thông tin từ query parameters trong URL
   const [searchParams] = useSearchParams();
-  const from = searchParams.get("from") || '';
-  const to = searchParams.get("to") || '';
-  const departureDate = searchParams.get("departureDate") || '';
-  const returnDate = searchParams.get("returnDate") || '';
+  const from = searchParams.get("from") || ''; // Điểm đi, ví dụ: "hanoi"
+  const to = searchParams.get("to") || ''; // Điểm đến, ví dụ: "danang"
+  const departureDate = searchParams.get("departureDate") || ''; // Ngày đi
+  const returnDate = searchParams.get("returnDate") || ''; // Ngày về
 
-  const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details');
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+  // Quản lý trạng thái
+  const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details'); // Tab trong modal chi tiết: "details" hoặc "operator"
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null); // Chuyến tàu được chọn để xem chi tiết
+  const [showFilters, setShowFilters] = useState(false); // Hiển thị bộ lọc trên mobile
   const [filters, setFilters] = useState<FilterTypes>({
-    time: { morning: false, afternoon: false, evening: false, all: true },
-    operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true },
-    amenities: { food: false, chair: false, socketPlug: false, tv: false, wifi: false },
-    pickup: { gaHanoi: false },
-    dropoff: { gaDanang: false },
+    time: { morning: false, afternoon: false, evening: false, all: true }, // Bộ lọc thời gian mặc định
+    operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true }, // Bộ lọc nhà điều hành mặc định
+    amenities: { food: false, chair: false, socketPlug: false, tv: false, wifi: false }, // Bộ lọc tiện nghi mặc định
+    pickup: { gaHanoi: false }, // Bộ lọc điểm đón mặc định
+    dropoff: { gaDanang: false }, // Bộ lọc điểm trả mặc định
   });
-  const [showSeatSelectionPopup, setShowSeatSelectionPopup] = useState<boolean>(false);
-  const [selectedTripForSeats, setSelectedTripForSeats] = useState<Trip | null>(null);
+  const [showSeatSelectionPopup, setShowSeatSelectionPopup] = useState<boolean>(false); // Hiển thị popup chọn ghế
+  const [selectedTripForSeats, setSelectedTripForSeats] = useState<Trip | null>(null); // Chuyến tàu được chọn để mở popup chọn ghế
 
-  const fromStation = provinces.find((p) => p.value === from);
-  const toStation = provinces.find((p) => p.value === to);
-  const fromLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A';
-  const toLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A';
-  const returnFromLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A';
-  const returnToLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A';
+  // Tìm thông tin ga từ danh sách provinces
+  const fromStation = provinces.find((p) => p.value === from); // Tìm ga đi
+  const toStation = provinces.find((p) => p.value === to); // Tìm ga đến
+  const fromLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đi
+  const toLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đến
+  const returnFromLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đi (chuyến về)
+  const returnToLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đến (chuyến về)
 
+  // Dữ liệu giả lập danh sách chuyến đi (outboundTrips) và chuyến về (returnTrips)
   const outboundTrips: Trip[] = [
     {
       id: "VN-int-int-3382-1496266-3044-2023-3048-2020-202504101950-3286-0e1e3f4c-06f5-46e4-800a-c5bad5ea4269",
@@ -792,48 +852,55 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
     },
   ];
 
+  // Hàm tạo danh sách toa giả lập để hiển thị trong popup chọn ghế
   const generateSeatTypes = (trip: Trip): SeatType[] => {
-    const coachCount = 6;
+    const coachCount = 6; // Số lượng toa giả lập
     const seatTypes: SeatType[] = [];
 
     for (let i = 1; i <= coachCount; i++) {
-      const isSeatCoach = trip.coachName.includes("VIP") || i === 1;
+      const isSeatCoach = trip.coachName.includes("VIP") || i === 1; // Toa 1 hoặc toa VIP là ghế ngồi
       seatTypes.push({
         coach: `Toa ${i}`,
         type: isSeatCoach ? "Ngồi mềm điều hòa" : "Giường nằm khoang 6 điều hòa",
         availability: trip.bedsAvailable,
-        price: `${(parseInt(trip.adultPrice.replace(/\./g, "")) / 1000)}K`,
+        price: `${(parseInt(trip.adultPrice.replace(/\./g, "")) / 1000)}K`, // Chuyển giá vé thành định dạng "3600K"
       });
     }
 
     return seatTypes;
   };
 
+  // Chọn danh sách chuyến đi dựa trên hướng chuyến (outbound hoặc return)
   const tripsToShow = tripDirection === 'outbound' ? outboundTrips : returnTrips;
 
+  // Lọc danh sách chuyến tàu dựa trên các bộ lọc
   const filteredTrips = tripsToShow.filter((trip) => {
+    // Xử lý thời gian khởi hành để so sánh với bộ lọc thời gian
     const departureTime = trip.departureTime;
-    const [hourStr, period] = departureTime.split(' ');
-    let hour = parseInt(hourStr.split(':')[0]);
-    if (period === 'PM' && hour !== 12) hour += 12;
-    if (period === 'AM' && hour === 12) hour = 0;
+    const [hourStr, period] = departureTime.split(' '); // Tách giờ và AM/PM
+    let hour = parseInt(hourStr.split(':')[0]); // Lấy giờ
+    if (period === 'PM' && hour !== 12) hour += 12; // Chuyển giờ PM sang định dạng 24h
+    if (period === 'AM' && hour === 12) hour = 0; // Chuyển 12 AM thành 0h
 
-    const isMorning = hour >= 0 && hour < 12;
-    const isAfternoon = hour >= 12 && hour < 19;
-    const isEvening = hour >= 19 && hour <= 23;
+    const isMorning = hour >= 0 && hour < 12; // Sáng: 00:00 - 11:59
+    const isAfternoon = hour >= 12 && hour < 19; // Chiều: 12:00 - 18:59
+    const isEvening = hour >= 19 && hour <= 23; // Tối: 19:00 - 23:59
 
+    // Kiểm tra bộ lọc thời gian
     const timeMatch =
       filters.time.all ||
       (filters.time.morning && isMorning) ||
       (filters.time.afternoon && isAfternoon) ||
       (filters.time.evening && isEvening);
 
+    // Kiểm tra bộ lọc nhà điều hành
     const operatorMatch =
       filters.operator.all ||
       (filters.operator.livitrans && trip.operator === 'LIVITRANS') ||
       (filters.operator.newLivitrans && trip.operator === 'New Livitrans') ||
       (filters.operator.lotusTrain && trip.operator === 'LOTUS TRAIN');
 
+    // Kiểm tra bộ lọc tiện nghi
     const amenitiesMatch =
       (!filters.amenities.food || trip.amenities.food) &&
       (!filters.amenities.chair || trip.amenities.massageChair) &&
@@ -841,25 +908,31 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
       (!filters.amenities.tv || trip.amenities.tv) &&
       (!filters.amenities.wifi || trip.amenities.wifi);
 
+    // Kiểm tra điểm đi (from) phù hợp với hướng chuyến
     const fromMatch = tripDirection === 'outbound'
       ? (from ? trip.fromCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true)
       : (to ? trip.fromCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true);
 
+    // Kiểm tra điểm đến (to) phù hợp với hướng chuyến
     const toMatch = tripDirection === 'outbound'
       ? (to ? trip.toCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true)
       : (from ? trip.toCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true);
 
+    // Kiểm tra ngày khởi hành
     const searchDate = tripDirection === 'outbound'
       ? (departureDate ? new Date(departureDate).toISOString().split('T')[0] : '')
       : (returnDate ? new Date(returnDate).toISOString().split('T')[0] : '');
     const dateMatch = searchDate ? trip.departureDate === searchDate : true;
 
+    // Kiểm tra bộ lọc điểm đón và điểm trả
     const pickupMatch = !filters.pickup.gaHanoi || trip.fromStation === 'Ga Hà Nội';
     const dropoffMatch = !filters.dropoff.gaDanang || trip.toStation === 'Ga Đà Nẵng';
 
+    // Trả về true nếu chuyến tàu thỏa mãn tất cả bộ lọc
     return timeMatch && operatorMatch && amenitiesMatch && fromMatch && toMatch && dateMatch && pickupMatch && dropoffMatch;
   });
 
+  // Hàm reset bộ lọc về trạng thái mặc định
   const resetFilters = () =>
     setFilters({
       time: { morning: false, afternoon: false, evening: false, all: true },
@@ -869,30 +942,35 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
       dropoff: { gaDanang: false },
     });
 
+  // Hàm mở modal chi tiết chuyến tàu
   const openTripDetails = (trip: Trip) => {
     setSelectedTrip(trip);
     setActiveTab('details');
   };
 
+  // Hàm đóng modal chi tiết chuyến tàu
   const closeModal = () => setSelectedTrip(null);
 
+  // Hàm mở popup chọn ghế
   const openSeatSelection = (trip: Trip) => {
     setSelectedTripForSeats(trip);
     setShowSeatSelectionPopup(true);
   };
 
+  // Hàm đóng popup chọn ghế
   const closeSeatSelectionPopup = () => {
     setShowSeatSelectionPopup(false);
     setSelectedTripForSeats(null);
   };
 
+  // Hàm xử lý tiếp tục chọn chuyến về (dành cho khứ hồi)
   const handleContinueToReturnTrip = () => {
     if (selectedTripForSeats) {
       setSelectedOutboundTrip({
         operator: selectedTripForSeats.operator,
         departureTime: selectedTripForSeats.departureTime,
       });
-      setTripDirection('return');
+      setTripDirection('return'); // Chuyển sang chọn chuyến về
       closeSeatSelectionPopup();
     }
   };
@@ -900,6 +978,7 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row gap-6">
+        {/* Thanh bộ lọc */}
         <FilterSidebar
           filters={filters}
           setFilters={setFilters}
@@ -907,8 +986,10 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
           setShowFilters={setShowFilters}
           resetFilters={resetFilters}
         />
+        {/* Danh sách chuyến tàu */}
         <div className="w-full md:w-3/4">
           <div className="bg-white rounded-lg shadow-md p-6">
+            {/* Tiêu đề: Tuyến đường (Điểm đi → Điểm đến) */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <span className="font-semibold">
@@ -923,6 +1004,7 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
                 <CFaEdit />
               </button>
             </div>
+            {/* Tiêu đề cột (chỉ hiển thị trên desktop) */}
             <div className="hidden md:grid grid-cols-12 gap-4 mb-4 text-sm border-b pb-2">
               <div className="col-span-2 font-semibold flex items-center gap-1">
                 <span>Giờ khởi hành</span>
@@ -942,6 +1024,7 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
               </div>
               <div className="col-span-2"></div>
             </div>
+            {/* Danh sách các chuyến tàu */}
             <div className="space-y-6">
               {filteredTrips.length > 0 ? (
                 filteredTrips.map((trip) => (
@@ -960,6 +1043,7 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
             </div>
           </div>
         </div>
+        {/* Modal chi tiết chuyến tàu (nếu có chuyến được chọn) */}
         {selectedTrip && (
           <TripDetailsModal
             selectedTrip={selectedTrip}
@@ -970,17 +1054,18 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
         )}
       </div>
 
+      {/* Popup chọn ghế (nếu có chuyến được chọn để chọn ghế) */}
       {showSeatSelectionPopup && selectedTripForSeats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <HeaderSelection
             departure={selectedTripForSeats.fromStation}
             arrival={selectedTripForSeats.toStation}
-            date={selectedTripForSeats.departureDate.split('-').reverse().join('/')}
+            date={selectedTripForSeats.departureDate.split('-').reverse().join('/')} // Định dạng lại ngày: "2025-04-10" → "10/04/2025"
             trainName={selectedTripForSeats.trainName || selectedTripForSeats.coachName}
-            seatTypes={generateSeatTypes(selectedTripForSeats)}
-            onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
-            onClose={closeSeatSelectionPopup}
-            onContinue={handleContinueToReturnTrip}
+            seatTypes={generateSeatTypes(selectedTripForSeats)} // Danh sách toa giả lập
+            onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)} // Log khi chọn toa
+            onClose={closeSeatSelectionPopup} // Đóng popup
+            onContinue={handleContinueToReturnTrip} // Tiếp tục chọn chuyến về (nếu là khứ hồi)
           />
         </div>
       )}

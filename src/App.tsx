@@ -16,6 +16,7 @@ import HeaderSelection from './Components/Popup/PopupSelectSeat';
 
 import SeatSelection from './Components/Popup/SeatSelection';
 import HeroSection from './pages/HomePage';
+import PaymentPage from './pages/PaymentPage';
 
 
 
@@ -37,6 +38,7 @@ const App: React.FC = () => {
                 <Route path="/signup" element={<SignupForm />} />
                 <Route path="/train-booking" element={<Layout />} />
                 <Route path="/train-search-results" element={<LayoutSearch />} />
+                <Route path="/payment" element={<PaymentPage />} />
                 <Route path ="/train-selection" element={<HeaderSelection departure={''} arrival={''} date={''} trainName={''} seatTypes={[]} onCoachClick={function (coach: string): void {
           throw new Error('Function not implemented.');
         } } />} />
