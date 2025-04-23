@@ -11,7 +11,7 @@ import {
   FaInfoCircle,
   FaTimes,
 } from 'react-icons/fa'; // Các icon từ thư viện react-icons
-import { useSearchParams } from 'react-router-dom'; // Hook để lấy query parameters từ URL
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'; // Hook để lấy query parameters từ URL
 import { provinces } from '../Data.js/provinces'; // Danh sách ga (provinces), định dạng: { value: string, label: string }
 import HeaderSelection from './Popup/PopupSelectSeat'; // Component popup để chọn ghế
 
@@ -603,304 +603,305 @@ const TripDetailsModal: React.FC<{
   </div>
 );
 
-// Định nghĩa kiểu dữ liệu cho props của component TrainSearchResults
+// Dữ liệu giả cho các chuyến đi (outboundTrips)
+const outboundTrips: Trip[] = [
+  {
+    id: "VN-int-int-3382-1496266-3044-2023-3048-2020-202504101950-3286-0e1e3f4c-06f5-46e4-800a-c5bad5ea4269",
+    departureTime: "07:50 PM",
+    duration: "17 hr 11 min*",
+    bedsAvailable: 16,
+    arrivalTime: "13:01",
+    fromStation: "Ga Hà Nội",
+    fromCity: "Hà Nội",
+    toStation: "Ga Đà Nẵng",
+    toCity: "Đà Nẵng",
+    operator: "LOTUS TRAIN",
+    trainName: "",
+    coachType: "B",
+    coachName: "SE19: VIP 2X - Private Twin-bed Cabin",
+    adultPrice: "3.600.000",
+    childPrice: "3.600.000",
+    amenities: {},
+    isLuxury: false,
+    fromAddress: "Ga Hà Nội",
+    toAddress: "Ga Đà Nẵng",
+    fromLatitude: 21.025062,
+    fromLongitude: 105.841181,
+    departureDate: "2025-04-10",
+  },
+  {
+    id: "VN-int-int-1342-1467997-3044-2023-3048-2020-202504101920-3174-d9be515c-61d2-4807-a06f-4b8111d4f91d",
+    departureTime: "07:20 PM",
+    duration: "17 hr 11 min*",
+    bedsAvailable: 28,
+    arrivalTime: "12:31",
+    fromStation: "Ga Hà Nội",
+    fromCity: "Hà Nội",
+    toStation: "Ga Đà Nẵng",
+    toCity: "Đà Nẵng",
+    operator: "LIVITRANS",
+    trainName: "",
+    coachType: "B",
+    coachName: "TÀU SE3: HÀ NỘI - ĐÀ NẴNG 19:20",
+    adultPrice: "1.850.000",
+    childPrice: "1.850.000",
+    amenities: { wifi: true, powerPlug: true, food: true },
+    isLuxury: false,
+    departureDate: "2025-04-10",
+  },
+  {
+    id: "VN-int-int-5678-9876543-20250419-1234-abcd1234-56ef-7890-ghij5678",
+    departureTime: "08:00 PM",
+    duration: "20 hr 30 min*",
+    bedsAvailable: 20,
+    arrivalTime: "16:30",
+    fromStation: "Ga Sài Gòn",
+    fromCity: "Hồ Chí Minh",
+    toStation: "Ga Hải Phòng",
+    toCity: "Hải Phòng",
+    operator: "LIVITRANS",
+    trainName: "SE5",
+    coachType: "B",
+    coachName: "SE5: HỒ CHÍ MINH - HẢI PHÒNG 20:00",
+    adultPrice: "2.200.000",
+    childPrice: "2.200.000",
+    amenities: { wifi: true, powerPlug: true },
+    isLuxury: false,
+    fromAddress: "Ga Sài Gòn",
+    toAddress: "Ga Hải Phòng",
+    fromLatitude: 10.780048,
+    fromLongitude: 106.678491,
+    departureDate: "2025-04-19",
+  },
+  {
+    id: "VN-int-int-9999-1234567-20250419-5678-efgh5678-90ij-1234-klmn7890",
+    departureTime: "06:30 PM",
+    duration: "16 hr 45 min*",
+    bedsAvailable: 24,
+    arrivalTime: "11:15",
+    fromStation: "Ga Hà Nội",
+    fromCity: "Hà Nội",
+    toStation: "Ga Đà Nẵng",
+    toCity: "Đà Nẵng",
+    operator: "LOTUS TRAIN",
+    trainName: "SE7",
+    coachType: "B",
+    coachName: "SE7: HÀ NỘI - ĐÀ NẴNG 18:30",
+    adultPrice: "3.200.000",
+    childPrice: "3.200.000",
+    amenities: { wifi: true, food: true },
+    isLuxury: true,
+    fromAddress: "Ga Hà Nội",
+    toAddress: "Ga Đà Nẵng",
+    fromLatitude: 21.025062,
+    fromLongitude: 105.841181,
+    departureDate: "2025-04-19",
+  },
+  {
+    id: "VN-int-int-8888-7654321-20250419-4321-hijk4321-09kl-5678-mnop1234",
+    departureTime: "09:00 PM",
+    duration: "16 hr 30 min*",
+    bedsAvailable: 18,
+    arrivalTime: "13:30",
+    fromStation: "Ga Hà Nội",
+    fromCity: "Hà Nội",
+    toStation: "Ga Đà Nẵng",
+    toCity: "Đà Nẵng",
+    operator: "LIVITRANS",
+    trainName: "SE9",
+    coachType: "B",
+    coachName: "SE9: HÀ NỘI - ĐÀ NẴNG 21:00",
+    adultPrice: "2.000.000",
+    childPrice: "2.000.000",
+    amenities: { wifi: true, powerPlug: true, food: true, tv: true },
+    isLuxury: false,
+    fromAddress: "Ga Hà Nội",
+    toAddress: "Ga Đà Nẵng",
+    fromLatitude: 21.025062,
+    fromLongitude: 105.841181,
+    departureDate: "2025-04-19",
+  },
+];
+
+// Dữ liệu giả cho các chuyến về (returnTrips)
+const returnTrips: Trip[] = [
+  {
+    id: "VN-int-int-1111-2222222-20250420-3333-abcd1111-4444-5555-efgh2222",
+    departureTime: "06:00 PM",
+    duration: "16 hr 45 min*",
+    bedsAvailable: 22,
+    arrivalTime: "10:45",
+    fromStation: "Ga Đà Nẵng",
+    fromCity: "Đà Nẵng",
+    toStation: "Ga Hà Nội",
+    toCity: "Hà Nội",
+    operator: "LOTUS TRAIN",
+    trainName: "SE8",
+    coachType: "B",
+    coachName: "SE8: ĐÀ NẴNG - HÀ NỘI 18:00",
+    adultPrice: "3.300.000",
+    childPrice: "3.300.000",
+    amenities: { wifi: true, food: true },
+    isLuxury: true,
+    fromAddress: "Ga Đà Nẵng",
+    toAddress: "Ga Hà Nội",
+    departureDate: "2025-04-20",
+  },
+  {
+    id: "VN-int-int-2222-3333333-20250420-4444-abcd2222-5555-6666-efgh3333",
+    departureTime: "08:00 PM",
+    duration: "17 hr 00 min*",
+    bedsAvailable: 26,
+    arrivalTime: "13:00",
+    fromStation: "Ga Đà Nẵng",
+    fromCity: "Đà Nẵng",
+    toStation: "Ga Hà Nội",
+    toCity: "Hà Nội",
+    operator: "LIVITRANS",
+    trainName: "SE10",
+    coachType: "B",
+    coachName: "SE10: ĐÀ NẴNG - HÀ NỘI 20:00",
+    adultPrice: "2.100.000",
+    childPrice: "2.100.000",
+    amenities: { wifi: true, powerPlug: true, food: true },
+    isLuxury: false,
+    fromAddress: "Ga Đà Nẵng",
+    toAddress: "Ga Hà Nội",
+    departureDate: "2025-04-20",
+  },
+  {
+    id: "VN-int-int-3333-4444444-20250420-5555-abcd3333-6666-7777-efgh4444",
+    departureTime: "09:30 PM",
+    duration: "16 hr 30 min*",
+    bedsAvailable: 20,
+    arrivalTime: "14:00",
+    fromStation: "Ga Đà Nẵng",
+    fromCity: "Đà Nẵng",
+    toStation: "Ga Hà Nội",
+    toCity: "Hà Nội",
+    operator: "LOTUS TRAIN",
+    trainName: "SE12",
+    coachType: "B",
+    coachName: "SE12: ĐÀ NẴNG - HÀ NỘI 21:30",
+    adultPrice: "3.500.000",
+    childPrice: "3.500.000",
+    amenities: { wifi: true, food: true, tv: true },
+    isLuxury: true,
+    fromAddress: "Ga Đà Nẵng",
+    toAddress: "Ga Hà Nội",
+    departureDate: "2025-04-20",
+  },
+  {
+    id: "VN-int-int-3333-4444444-20250420-5555-abcd3333-6666-7777-efgh4444",
+    departureTime: "09:30 PM",
+    duration: "16 hr 30 min*",
+    bedsAvailable: 20,
+    arrivalTime: "14:00",
+    fromStation: "Ga Đà Nẵng",
+    fromCity: "Đà Nẵng",
+    toStation: "Ga Hà Nội",
+    toCity: "Hà Nội",
+    operator: "LOTUS TRAIN",
+    trainName: "SE12",
+    coachType: "B",
+    coachName: "SE12: ĐÀ NẴNG - HÀ NỘI 21:30",
+    adultPrice: "3.500.000",
+    childPrice: "3.500.000",
+    amenities: { wifi: true, food: true, tv: true },
+    isLuxury: true,
+    fromAddress: "Ga Đà Nẵng",
+    toAddress: "Ga Hà Nội",
+    departureDate: "2025-04-28",
+  },
+];
+
 interface TrainSearchResultsProps {
-  setSelectedOutboundTrip: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string } | null>>; // Hàm lưu chuyến đi đã chọn
-  setTripDirection: React.Dispatch<React.SetStateAction<'outbound' | 'return'>>; // Hàm cập nhật hướng chuyến (outbound/return)
-  tripDirection: 'outbound' | 'return'; // Hướng chuyến hiện tại
+  setSelectedOutboundTrip: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string; seats?: string[] } | null>>;
+  setSelectedReturnTrip: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string; seats?: string[] } | null>>;
+  selectedOutboundTrip: { operator: string; departureTime: string; seats?: string[] } | null;
+  selectedReturnTrip: { operator: string; departureTime: string; seats?: string[] } | null;
+  setTripDirection: React.Dispatch<React.SetStateAction<'outbound' | 'return'>>;
+  tripDirection: 'outbound' | 'return';
 }
 
-// Component chính: TrainSearchResults
-const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutboundTrip, setTripDirection, tripDirection }) => {
-  // Lấy thông tin từ query parameters trong URL
+const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
+  setSelectedOutboundTrip,
+  setSelectedReturnTrip,
+  selectedOutboundTrip,
+  selectedReturnTrip,
+  setTripDirection,
+  tripDirection,
+}) => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const from = searchParams.get("from") || ''; // Điểm đi, ví dụ: "hanoi"
-  const to = searchParams.get("to") || ''; // Điểm đến, ví dụ: "danang"
-  const departureDate = searchParams.get("departureDate") || ''; // Ngày đi
-  const returnDate = searchParams.get("returnDate") || ''; // Ngày về
+  const from = searchParams.get("from") || '';
+  const to = searchParams.get("to") || '';
+  const departureDate = searchParams.get("departureDate") || '';
+  const returnDate = searchParams.get("returnDate") || '';
+  const roundTrip = searchParams.get("roundTrip") === 'true';
 
-  // Quản lý trạng thái
-  const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details'); // Tab trong modal chi tiết: "details" hoặc "operator"
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null); // Chuyến tàu được chọn để xem chi tiết
-  const [showFilters, setShowFilters] = useState(false); // Hiển thị bộ lọc trên mobile
+  const [activeTab, setActiveTab] = useState<'details' | 'operator'>('details');
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterTypes>({
-    time: { morning: false, afternoon: false, evening: false, all: true }, // Bộ lọc thời gian mặc định
-    operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true }, // Bộ lọc nhà điều hành mặc định
-    amenities: { food: false, chair: false, socketPlug: false, tv: false, wifi: false }, // Bộ lọc tiện nghi mặc định
-    pickup: { gaHanoi: false }, // Bộ lọc điểm đón mặc định
-    dropoff: { gaDanang: false }, // Bộ lọc điểm trả mặc định
+    time: { morning: false, afternoon: false, evening: false, all: true },
+    operator: { livitrans: false, newLivitrans: false, lotusTrain: false, all: true },
+    amenities: { food: false, chair: false, socketPlug: false, tv: false, wifi: false },
+    pickup: { gaHanoi: false },
+    dropoff: { gaDanang: false },
   });
-  const [showSeatSelectionPopup, setShowSeatSelectionPopup] = useState<boolean>(false); // Hiển thị popup chọn ghế
-  const [selectedTripForSeats, setSelectedTripForSeats] = useState<Trip | null>(null); // Chuyến tàu được chọn để mở popup chọn ghế
+  const [showSeatSelectionPopup, setShowSeatSelectionPopup] = useState<boolean>(false);
+  const [selectedTripForSeats, setSelectedTripForSeats] = useState<Trip | null>(null);
 
-  // Tìm thông tin ga từ danh sách provinces
-  const fromStation = provinces.find((p) => p.value === from); // Tìm ga đi
-  const toStation = provinces.find((p) => p.value === to); // Tìm ga đến
-  const fromLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đi
-  const toLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đến
-  const returnFromLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đi (chuyến về)
-  const returnToLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A'; // Tên hiển thị ga đến (chuyến về)
+  const fromStation = provinces.find((p) => p.value === from);
+  const toStation = provinces.find((p) => p.value === to);
+  const fromLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A';
+  const toLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A';
+  const returnFromLabel = toStation ? `${toStation.label}, Việt Nam` : 'N/A';
+  const returnToLabel = fromStation ? `${fromStation.label}, Việt Nam` : 'N/A';
 
-  // Dữ liệu giả lập danh sách chuyến đi (outboundTrips) và chuyến về (returnTrips)
-  const outboundTrips: Trip[] = [
-    {
-      id: "VN-int-int-3382-1496266-3044-2023-3048-2020-202504101950-3286-0e1e3f4c-06f5-46e4-800a-c5bad5ea4269",
-      departureTime: "07:50 PM",
-      duration: "17 hr 11 min*",
-      bedsAvailable: 16,
-      arrivalTime: "13:01",
-      fromStation: "Ga Hà Nội",
-      fromCity: "Hà Nội",
-      toStation: "Ga Đà Nẵng",
-      toCity: "Đà Nẵng",
-      operator: "LOTUS TRAIN",
-      trainName: "",
-      coachType: "B",
-      coachName: "SE19: VIP 2X - Private Twin-bed Cabin",
-      adultPrice: "3.600.000",
-      childPrice: "3.600.000",
-      amenities: {},
-      isLuxury: false,
-      fromAddress: "Ga Hà Nội",
-      toAddress: "Ga Đà Nẵng",
-      fromLatitude: 21.025062,
-      fromLongitude: 105.841181,
-      departureDate: "2025-04-10",
-    },
-    {
-      id: "VN-int-int-1342-1467997-3044-2023-3048-2020-202504101920-3174-d9be515c-61d2-4807-a06f-4b8111d4f91d",
-      departureTime: "07:20 PM",
-      duration: "17 hr 11 min*",
-      bedsAvailable: 28,
-      arrivalTime: "12:31",
-      fromStation: "Ga Hà Nội",
-      fromCity: "Hà Nội",
-      toStation: "Ga Đà Nẵng",
-      toCity: "Đà Nẵng",
-      operator: "LIVITRANS",
-      trainName: "",
-      coachType: "B",
-      coachName: "TÀU SE3: HÀ NỘI - ĐÀ NẴNG 19:20",
-      adultPrice: "1.850.000",
-      childPrice: "1.850.000",
-      amenities: { wifi: true, powerPlug: true, food: true },
-      isLuxury: false,
-      departureDate: "2025-04-10",
-    },
-    {
-      id: "VN-int-int-5678-9876543-20250419-1234-abcd1234-56ef-7890-ghij5678",
-      departureTime: "08:00 PM",
-      duration: "20 hr 30 min*",
-      bedsAvailable: 20,
-      arrivalTime: "16:30",
-      fromStation: "Ga Sài Gòn",
-      fromCity: "Hồ Chí Minh",
-      toStation: "Ga Hải Phòng",
-      toCity: "Hải Phòng",
-      operator: "LIVITRANS",
-      trainName: "SE5",
-      coachType: "B",
-      coachName: "SE5: HỒ CHÍ MINH - HẢI PHÒNG 20:00",
-      adultPrice: "2.200.000",
-      childPrice: "2.200.000",
-      amenities: { wifi: true, powerPlug: true },
-      isLuxury: false,
-      fromAddress: "Ga Sài Gòn",
-      toAddress: "Ga Hải Phòng",
-      fromLatitude: 10.780048,
-      fromLongitude: 106.678491,
-      departureDate: "2025-04-19",
-    },
-    {
-      id: "VN-int-int-9999-1234567-20250419-5678-efgh5678-90ij-1234-klmn7890",
-      departureTime: "06:30 PM",
-      duration: "16 hr 45 min*",
-      bedsAvailable: 24,
-      arrivalTime: "11:15",
-      fromStation: "Ga Hà Nội",
-      fromCity: "Hà Nội",
-      toStation: "Ga Đà Nẵng",
-      toCity: "Đà Nẵng",
-      operator: "LOTUS TRAIN",
-      trainName: "SE7",
-      coachType: "B",
-      coachName: "SE7: HÀ NỘI - ĐÀ NẴNG 18:30",
-      adultPrice: "3.200.000",
-      childPrice: "3.200.000",
-      amenities: { wifi: true, food: true },
-      isLuxury: true,
-      fromAddress: "Ga Hà Nội",
-      toAddress: "Ga Đà Nẵng",
-      fromLatitude: 21.025062,
-      fromLongitude: 105.841181,
-      departureDate: "2025-04-19",
-    },
-    {
-      id: "VN-int-int-8888-7654321-20250419-4321-hijk4321-09kl-5678-mnop1234",
-      departureTime: "09:00 PM",
-      duration: "16 hr 30 min*",
-      bedsAvailable: 18,
-      arrivalTime: "13:30",
-      fromStation: "Ga Hà Nội",
-      fromCity: "Hà Nội",
-      toStation: "Ga Đà Nẵng",
-      toCity: "Đà Nẵng",
-      operator: "LIVITRANS",
-      trainName: "SE9",
-      coachType: "B",
-      coachName: "SE9: HÀ NỘI - ĐÀ NẴNG 21:00",
-      adultPrice: "2.000.000",
-      childPrice: "2.000.000",
-      amenities: { wifi: true, powerPlug: true, food: true, tv: true },
-      isLuxury: false,
-      fromAddress: "Ga Hà Nội",
-      toAddress: "Ga Đà Nẵng",
-      fromLatitude: 21.025062,
-      fromLongitude: 105.841181,
-      departureDate: "2025-04-19",
-    },
-  ];
-
-  const returnTrips: Trip[] = [
-    {
-      id: "VN-int-int-1111-2222222-20250420-3333-abcd1111-4444-5555-efgh2222",
-      departureTime: "06:00 PM",
-      duration: "16 hr 45 min*",
-      bedsAvailable: 22,
-      arrivalTime: "10:45",
-      fromStation: "Ga Đà Nẵng",
-      fromCity: "Đà Nẵng",
-      toStation: "Ga Hà Nội",
-      toCity: "Hà Nội",
-      operator: "LOTUS TRAIN",
-      trainName: "SE8",
-      coachType: "B",
-      coachName: "SE8: ĐÀ NẴNG - HÀ NỘI 18:00",
-      adultPrice: "3.300.000",
-      childPrice: "3.300.000",
-      amenities: { wifi: true, food: true },
-      isLuxury: true,
-      fromAddress: "Ga Đà Nẵng",
-      toAddress: "Ga Hà Nội",
-      departureDate: "2025-04-20",
-    },
-    {
-      id: "VN-int-int-2222-3333333-20250420-4444-abcd2222-5555-6666-efgh3333",
-      departureTime: "08:00 PM",
-      duration: "17 hr 00 min*",
-      bedsAvailable: 26,
-      arrivalTime: "13:00",
-      fromStation: "Ga Đà Nẵng",
-      fromCity: "Đà Nẵng",
-      toStation: "Ga Hà Nội",
-      toCity: "Hà Nội",
-      operator: "LIVITRANS",
-      trainName: "SE10",
-      coachType: "B",
-      coachName: "SE10: ĐÀ NẴNG - HÀ NỘI 20:00",
-      adultPrice: "2.100.000",
-      childPrice: "2.100.000",
-      amenities: { wifi: true, powerPlug: true, food: true },
-      isLuxury: false,
-      fromAddress: "Ga Đà Nẵng",
-      toAddress: "Ga Hà Nội",
-      departureDate: "2025-04-20",
-    },
-    {
-      id: "VN-int-int-3333-4444444-20250420-5555-abcd3333-6666-7777-efgh4444",
-      departureTime: "09:30 PM",
-      duration: "16 hr 30 min*",
-      bedsAvailable: 20,
-      arrivalTime: "14:00",
-      fromStation: "Ga Đà Nẵng",
-      fromCity: "Đà Nẵng",
-      toStation: "Ga Hà Nội",
-      toCity: "Hà Nội",
-      operator: "LOTUS TRAIN",
-      trainName: "SE12",
-      coachType: "B",
-      coachName: "SE12: ĐÀ NẴNG - HÀ NỘI 21:30",
-      adultPrice: "3.500.000",
-      childPrice: "3.500.000",
-      amenities: { wifi: true, food: true, tv: true },
-      isLuxury: true,
-      fromAddress: "Ga Đà Nẵng",
-      toAddress: "Ga Hà Nội",
-      departureDate: "2025-04-20",
-    },
-    {
-      id: "VN-int-int-3333-4444444-20250420-5555-abcd3333-6666-7777-efgh4444",
-      departureTime: "09:30 PM",
-      duration: "16 hr 30 min*",
-      bedsAvailable: 20,
-      arrivalTime: "14:00",
-      fromStation: "Ga Đà Nẵng",
-      fromCity: "Đà Nẵng",
-      toStation: "Ga Hà Nội",
-      toCity: "Hà Nội",
-      operator: "LOTUS TRAIN",
-      trainName: "SE12",
-      coachType: "B",
-      coachName: "SE12: ĐÀ NẴNG - HÀ NỘI 21:30",
-      adultPrice: "3.500.000",
-      childPrice: "3.500.000",
-      amenities: { wifi: true, food: true, tv: true },
-      isLuxury: true,
-      fromAddress: "Ga Đà Nẵng",
-      toAddress: "Ga Hà Nội",
-      departureDate: "2025-04-28",
-    },
-  ];
-
-  // Hàm tạo danh sách toa giả lập để hiển thị trong popup chọn ghế
   const generateSeatTypes = (trip: Trip): SeatType[] => {
-    const coachCount = 6; // Số lượng toa giả lập
+    const coachCount = 6;
     const seatTypes: SeatType[] = [];
 
     for (let i = 1; i <= coachCount; i++) {
-      const isSeatCoach = trip.coachName.includes("VIP") || i === 1; // Toa 1 hoặc toa VIP là ghế ngồi
+      const isSeatCoach = trip.coachName.includes("VIP") || i === 1;
       seatTypes.push({
         coach: `Toa ${i}`,
         type: isSeatCoach ? "Ngồi mềm điều hòa" : "Giường nằm khoang 6 điều hòa",
         availability: trip.bedsAvailable,
-        price: `${(parseInt(trip.adultPrice.replace(/\./g, "")) / 1000)}K`, // Chuyển giá vé thành định dạng "3600K"
+        price: `${(parseInt(trip.adultPrice.replace(/\./g, "")) / 1000)}K`,
       });
     }
 
     return seatTypes;
   };
 
-  // Chọn danh sách chuyến đi dựa trên hướng chuyến (outbound hoặc return)
   const tripsToShow = tripDirection === 'outbound' ? outboundTrips : returnTrips;
 
-  // Lọc danh sách chuyến tàu dựa trên các bộ lọc
-  const filteredTrips = tripsToShow.filter((trip) => {
-    // Xử lý thời gian khởi hành để so sánh với bộ lọc thời gian
+  const filteredTrips = tripsToShow.filter((trip: Trip) => {
     const departureTime = trip.departureTime;
-    const [hourStr, period] = departureTime.split(' '); // Tách giờ và AM/PM
-    let hour = parseInt(hourStr.split(':')[0]); // Lấy giờ
-    if (period === 'PM' && hour !== 12) hour += 12; // Chuyển giờ PM sang định dạng 24h
-    if (period === 'AM' && hour === 12) hour = 0; // Chuyển 12 AM thành 0h
+    const [hourStr, period] = departureTime.split(' ');
+    let hour = parseInt(hourStr.split(':')[0]);
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
 
-    const isMorning = hour >= 0 && hour < 12; // Sáng: 00:00 - 11:59
-    const isAfternoon = hour >= 12 && hour < 19; // Chiều: 12:00 - 18:59
-    const isEvening = hour >= 19 && hour <= 23; // Tối: 19:00 - 23:59
+    const isMorning = hour >= 0 && hour < 12;
+    const isAfternoon = hour >= 12 && hour < 19;
+    const isEvening = hour >= 19 && hour <= 23;
 
-    // Kiểm tra bộ lọc thời gian
     const timeMatch =
       filters.time.all ||
       (filters.time.morning && isMorning) ||
       (filters.time.afternoon && isAfternoon) ||
       (filters.time.evening && isEvening);
 
-    // Kiểm tra bộ lọc nhà điều hành
     const operatorMatch =
       filters.operator.all ||
       (filters.operator.livitrans && trip.operator === 'LIVITRANS') ||
       (filters.operator.newLivitrans && trip.operator === 'New Livitrans') ||
       (filters.operator.lotusTrain && trip.operator === 'LOTUS TRAIN');
 
-    // Kiểm tra bộ lọc tiện nghi
     const amenitiesMatch =
       (!filters.amenities.food || trip.amenities.food) &&
       (!filters.amenities.chair || trip.amenities.massageChair) &&
@@ -908,31 +909,25 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
       (!filters.amenities.tv || trip.amenities.tv) &&
       (!filters.amenities.wifi || trip.amenities.wifi);
 
-    // Kiểm tra điểm đi (from) phù hợp với hướng chuyến
     const fromMatch = tripDirection === 'outbound'
       ? (from ? trip.fromCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true)
       : (to ? trip.fromCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true);
 
-    // Kiểm tra điểm đến (to) phù hợp với hướng chuyến
     const toMatch = tripDirection === 'outbound'
       ? (to ? trip.toCity.toLowerCase() === (toStation?.label.toLowerCase() || '') : true)
       : (from ? trip.toCity.toLowerCase() === (fromStation?.label.toLowerCase() || '') : true);
 
-    // Kiểm tra ngày khởi hành
     const searchDate = tripDirection === 'outbound'
       ? (departureDate ? new Date(departureDate).toISOString().split('T')[0] : '')
       : (returnDate ? new Date(returnDate).toISOString().split('T')[0] : '');
     const dateMatch = searchDate ? trip.departureDate === searchDate : true;
 
-    // Kiểm tra bộ lọc điểm đón và điểm trả
     const pickupMatch = !filters.pickup.gaHanoi || trip.fromStation === 'Ga Hà Nội';
     const dropoffMatch = !filters.dropoff.gaDanang || trip.toStation === 'Ga Đà Nẵng';
 
-    // Trả về true nếu chuyến tàu thỏa mãn tất cả bộ lọc
     return timeMatch && operatorMatch && amenitiesMatch && fromMatch && toMatch && dateMatch && pickupMatch && dropoffMatch;
   });
 
-  // Hàm reset bộ lọc về trạng thái mặc định
   const resetFilters = () =>
     setFilters({
       time: { morning: false, afternoon: false, evening: false, all: true },
@@ -942,35 +937,35 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
       dropoff: { gaDanang: false },
     });
 
-  // Hàm mở modal chi tiết chuyến tàu
   const openTripDetails = (trip: Trip) => {
     setSelectedTrip(trip);
     setActiveTab('details');
   };
 
-  // Hàm đóng modal chi tiết chuyến tàu
   const closeModal = () => setSelectedTrip(null);
 
-  // Hàm mở popup chọn ghế
   const openSeatSelection = (trip: Trip) => {
     setSelectedTripForSeats(trip);
     setShowSeatSelectionPopup(true);
   };
 
-  // Hàm đóng popup chọn ghế
   const closeSeatSelectionPopup = () => {
     setShowSeatSelectionPopup(false);
     setSelectedTripForSeats(null);
   };
 
-  // Hàm xử lý tiếp tục chọn chuyến về (dành cho khứ hồi)
   const handleContinueToReturnTrip = () => {
+    if (!selectedOutboundTrip || !selectedOutboundTrip.seats || selectedOutboundTrip.seats.length === 0) {
+      alert("Vui lòng chọn ghế cho chuyến đi trước khi tiếp tục!");
+      return;
+    }
     if (selectedTripForSeats) {
       setSelectedOutboundTrip({
         operator: selectedTripForSeats.operator,
         departureTime: selectedTripForSeats.departureTime,
+        seats: selectedOutboundTrip?.seats || [],
       });
-      setTripDirection('return'); // Chuyển sang chọn chuyến về
+      setTripDirection('return');
       closeSeatSelectionPopup();
     }
   };
@@ -978,7 +973,6 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Thanh bộ lọc */}
         <FilterSidebar
           filters={filters}
           setFilters={setFilters}
@@ -986,10 +980,8 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
           setShowFilters={setShowFilters}
           resetFilters={resetFilters}
         />
-        {/* Danh sách chuyến tàu */}
         <div className="w-full md:w-3/4">
           <div className="bg-white rounded-lg shadow-md p-6">
-            {/* Tiêu đề: Tuyến đường (Điểm đi → Điểm đến) */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <span className="font-semibold">
@@ -1004,7 +996,6 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
                 <CFaEdit />
               </button>
             </div>
-            {/* Tiêu đề cột (chỉ hiển thị trên desktop) */}
             <div className="hidden md:grid grid-cols-12 gap-4 mb-4 text-sm border-b pb-2">
               <div className="col-span-2 font-semibold flex items-center gap-1">
                 <span>Giờ khởi hành</span>
@@ -1024,10 +1015,9 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
               </div>
               <div className="col-span-2"></div>
             </div>
-            {/* Danh sách các chuyến tàu */}
             <div className="space-y-6">
               {filteredTrips.length > 0 ? (
-                filteredTrips.map((trip) => (
+                filteredTrips.map((trip: Trip) => (
                   <TripCard
                     key={trip.id}
                     trip={trip}
@@ -1043,7 +1033,6 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
             </div>
           </div>
         </div>
-        {/* Modal chi tiết chuyến tàu (nếu có chuyến được chọn) */}
         {selectedTrip && (
           <TripDetailsModal
             selectedTrip={selectedTrip}
@@ -1054,18 +1043,23 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({ setSelectedOutb
         )}
       </div>
 
-      {/* Popup chọn ghế (nếu có chuyến được chọn để chọn ghế) */}
       {showSeatSelectionPopup && selectedTripForSeats && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <HeaderSelection
             departure={selectedTripForSeats.fromStation}
             arrival={selectedTripForSeats.toStation}
-            date={selectedTripForSeats.departureDate.split('-').reverse().join('/')} // Định dạng lại ngày: "2025-04-10" → "10/04/2025"
+            date={selectedTripForSeats.departureDate.split('-').reverse().join('/')}
             trainName={selectedTripForSeats.trainName || selectedTripForSeats.coachName}
-            seatTypes={generateSeatTypes(selectedTripForSeats)} // Danh sách toa giả lập
-            onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)} // Log khi chọn toa
-            onClose={closeSeatSelectionPopup} // Đóng popup
-            onContinue={handleContinueToReturnTrip} // Tiếp tục chọn chuyến về (nếu là khứ hồi)
+            seatTypes={generateSeatTypes(selectedTripForSeats)}
+            onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
+            onClose={closeSeatSelectionPopup}
+            onContinue={handleContinueToReturnTrip}
+            tripDirection={tripDirection}
+            roundTrip={roundTrip}
+            selectedOutboundTrip={selectedOutboundTrip}
+            selectedReturnTrip={selectedReturnTrip}
+            setSelectedOutboundTrip={setSelectedOutboundTrip}
+            setSelectedReturnTrip={setSelectedReturnTrip}
           />
         </div>
       )}

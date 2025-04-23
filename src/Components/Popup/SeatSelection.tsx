@@ -1,76 +1,70 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-// Định nghĩa kiểu dữ liệu cho một ghế
 export interface Seat {
-  seatNumber: string; // Số ghế, ví dụ: "1", "2" (cho ghế ngồi) hoặc "G1", "G2" (cho giường nằm)
-  isAvailable: boolean; // Trạng thái ghế: true (còn trống), false (đã bán)
-  type: string; // Loại ghế, ví dụ: "Ngồi mềm" hoặc "Giường nằm"
-  tier?: number; // Tầng (dành cho giường nằm), ví dụ: 1, 2, 3 (tầng 1, tầng 2, tầng 3)
-  compartment?: number; // Khoang (dành cho giường nằm), ví dụ: 1, 2,... (khoang 1, khoang 2,...)
+  seatNumber: string;
+  isAvailable: boolean;
+  type: string;
+  tier?: number;
+  compartment?: number;
 }
 
-// Định nghĩa kiểu dữ liệu cho các props của component SeatSelection
 export interface SeatSelectionProps {
-  coach: string; // Tên toa, ví dụ: "Toa 1"
-  seats: Seat[]; // Danh sách các ghế trong toa
-  onSeatClick?: (seatNumber: string) => void; // Hàm callback khi người dùng click vào một ghế, truyền số ghế (ví dụ: "1")
-  totalAvailableSeats?: number; // Tổng số ghế còn trống trong toa, ví dụ: 11
-  onContinue?: () => void; // Hàm callback khi người dùng nhấn nút "Tiếp tục chọn chuyến về" (dành cho chuyến khứ hồi)
-  onBook?: (selectedSeats: string[]) => void; // Hàm callback khi người dùng nhấn nút "Đặt vé", truyền danh sách ghế đã chọn
-  departure?: string; // Điểm khởi hành, ví dụ: "Ga Hà Nội" (dùng để log thông tin đặt vé)
-  arrival?: string; // Điểm đến, ví dụ: "Ga Đà Nẵng" (dùng để log thông tin đặt vé)
-  date?: string; // Ngày đi, ví dụ: "10/04/2025" (dùng để log thông tin đặt vé)
-  trainName?: string; // Tên tàu, ví dụ: "SE19: VIP 2X" (dùng để log thông tin đặt vé)
+  coach: string;
+  seats: Seat[];
+  onSeatClick?: (seatNumber: string) => void;
+  totalAvailableSeats?: number;
+  onContinue?: () => void;
+  onBook?: (selectedSeats: string[]) => void;
+  departure?: string;
+  arrival?: string;
+  date?: string;
+  trainName?: string;
   tripDirection?: 'outbound' | 'return';
+  roundTrip?: boolean; // Thêm prop roundTrip vào giao diện
+  selectedOutboundTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
+  selectedReturnTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
 }
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({
-  coach, // Tên toa
-  seats, // Danh sách ghế trong toa
-  onSeatClick, // Hàm xử lý khi click vào ghế
-  totalAvailableSeats = 0, // Tổng số ghế còn trống
-  onContinue, // Hàm xử lý khi nhấn "Tiếp tục chọn chuyến về"
-  onBook, // Hàm xử lý khi nhấn "Đặt vé"
-  departure, // Điểm khởi hành
-  arrival, // Điểm đến
-  date, // Ngày đi
-  trainName, // Tên tàu
-  tripDirection
+  coach,
+  seats,
+  onSeatClick,
+  totalAvailableSeats = 0,
+  onContinue,
+  onBook,
+  departure,
+  arrival,
+  date,
+  trainName,
+  tripDirection,
+  roundTrip,
+  selectedOutboundTrip,
+  selectedReturnTrip,
 }) => {
-  // Quản lý danh sách ghế đã chọn (state)
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]); // Ví dụ: ["1", "2"] nếu người dùng chọn ghế 1 và 2
-  const navigate = useNavigate(); // Khởi tạo useNavigate để chuyển hướng
-  // Lấy query parameter từ URL để kiểm tra xem có phải chuyến khứ hồi không
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const roundTrip = queryParams.get("roundTrip") === "true"; // true nếu là chuyến khứ hồi, false nếu là một chiều
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const navigate = useNavigate();
 
-  // Hàm xử lý khi người dùng click vào một ghế
   const handleSeatClick = (seatNumber: string) => {
     if (selectedSeats.includes(seatNumber)) {
-      // Nếu ghế đã được chọn, bỏ chọn ghế đó
       setSelectedSeats(selectedSeats.filter((seat) => seat !== seatNumber));
     } else {
-      // Nếu ghế chưa được chọn, thêm ghế vào danh sách đã chọn
       setSelectedSeats([...selectedSeats, seatNumber]);
     }
-    onSeatClick?.(seatNumber); // Gọi hàm callback nếu có
+    onSeatClick?.(seatNumber);
   };
 
-  // Hàm xử lý khi người dùng nhấn nút "Tiếp tục chọn chuyến về" hoặc "Đặt vé"
   const handleButtonClick = () => {
+    if (selectedSeats.length === 0) {
+      alert("Vui lòng chọn ít nhất một ghế trước khi tiếp tục!");
+      return;
+    }
+
+    onBook?.(selectedSeats);
+
     if (roundTrip && tripDirection === "outbound") {
-      // Nếu là chuyến khứ hồi và đang chọn chuyến đi, gọi onContinue để chọn chuyến về
       onContinue?.();
     } else {
-      // Nếu là chuyến một chiều hoặc đang chọn chuyến về, xử lý đặt vé
-      if (selectedSeats.length === 0) {
-        alert("Vui lòng chọn ít nhất một ghế trước khi đặt vé!");
-        return;
-      }
-
-      // Log thông tin đặt vé
       console.log("Thông tin đặt vé:", {
         departure,
         arrival,
@@ -78,38 +72,30 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         trainName,
         coach,
         selectedSeats,
+        tripDirection,
       });
 
-      // Gọi onBook để xử lý logic đặt vé (nếu có)
-      onBook?.(selectedSeats);
-
-      // Chuyển hướng đến trang thanh toán, truyền thông tin đặt vé qua state
       navigate("/payment", {
         state: {
-          departure,
-          arrival,
-          date,
-          trainName,
-          coach,
-          selectedSeats,
-          tripDirection,
+          outboundTrip: selectedOutboundTrip,
+          returnTrip: roundTrip ? selectedReturnTrip : null,
+          outboundSeats: selectedOutboundTrip?.seats || [],
+          returnSeats: selectedReturnTrip?.seats || [],
         },
       });
     }
   };
-  // Xác định loại toa: toa ghế ngồi (Toa 1, Toa 2) hay toa giường nằm (Toa 3 trở lên)
-  const coachNumber = parseInt(coach.replace("Toa ", "")); // Ví dụ: "Toa 1" -> 1
-  const isSeatCoach = coachNumber <= 2; // true nếu là toa ghế ngồi (Toa 1, Toa 2)
-  const isBedCoach = coachNumber >= 3; // true nếu là toa giường nằm (Toa 3 trở lên)
 
-  // Cấu trúc hiển thị ghế ngồi: 4 hàng, mỗi hàng 16 ghế (8 ghế mỗi bên lối đi)
-  const seatRows = 4; // 4 hàng ghế ngồi
-  const seatsPerSide = 8; // 8 ghế mỗi bên lối đi (4 hàng x 16 ghế = 64 ghế)
-  const seatCols = seatsPerSide * 2; // Tổng số cột: 16 ghế (8 trái + 8 phải)
+  const showBookButton = !roundTrip || (roundTrip && tripDirection === "return" && selectedOutboundTrip?.seats && selectedOutboundTrip.seats.length > 0);
 
-  // Cấu trúc hiển thị giường nằm: 6 giường mỗi khoang
-  const bedsPerCompartment = 6; // 6 giường mỗi khoang (3 giường mỗi bên lối đi)
-  const compartments = isBedCoach ? Math.ceil(seats.length / bedsPerCompartment) : 1; // Tổng số khoang, ví dụ: 64 ghế / 6 = 11 khoang
+  const coachNumber = parseInt(coach.replace("Toa ", ""));
+  const isSeatCoach = coachNumber <= 2;
+  const isBedCoach = coachNumber >= 3;
+  const seatRows = 4;
+  const seatsPerSide = 8;
+  const seatCols = seatsPerSide * 2;
+  const bedsPerCompartment = 6;
+  const compartments = isBedCoach ? Math.ceil(seats.length / bedsPerCompartment) : 1;
 
   return (
     <div className="bg-gray-50 p-6 rounded-lg shadow-sm sm:p-4">
@@ -288,14 +274,14 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
           onClick={handleButtonClick}
           className="bg-orange-500 text-white px-6 py-2 sm:px-4 sm:py-1.5 rounded-lg flex items-center text-sm sm:text-xs hover:bg-orange-600 transition-colors cursor-pointer"
         >
-          {roundTrip && tripDirection === "outbound" ? "Tiếp tục chọn chuyến về" : "Đặt vé"}
-          {roundTrip && tripDirection === "outbound" ? (
+          {showBookButton ? "Đặt vé" : "Tiếp tục chọn chuyến về"}
+          {showBookButton ? (
             <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
             </svg>
           ) : (
             <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
             </svg>
           )}
         </button>
