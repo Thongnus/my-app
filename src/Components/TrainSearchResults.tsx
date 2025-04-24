@@ -14,6 +14,7 @@ import {
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'; // Hook để lấy query parameters từ URL
 import { provinces } from '../Data.js/provinces'; // Danh sách ga (provinces), định dạng: { value: string, label: string }
 import HeaderSelection from './Popup/PopupSelectSeat'; // Component popup để chọn ghế
+import { FilterTypes, OperatorFilter, SeatType, TimeFilter, Trip } from '../Entity/Entity';
 
 // Ép kiểu các icon từ Fa* thành React component để sử dụng trong JSX
 const CFaTimes = FaTimes as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -27,70 +28,6 @@ const CFaSlidersH = FaSlidersH as unknown as React.FC<React.SVGProps<SVGSVGEleme
 const CFaCaretDown = FaCaretDown as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaCaretUp = FaCaretUp as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 
-// Định nghĩa kiểu dữ liệu cho một chuyến tàu
-interface Trip {
-  id: string; // ID của chuyến tàu, ví dụ: "VN-int-int-3382-..."
-  departureTime: string; // Giờ khởi hành, ví dụ: "07:50 PM"
-  duration: string; // Thời gian di chuyển, ví dụ: "17 hr 11 min*"
-  bedsAvailable: number; // Số giường còn trống, ví dụ: 16
-  arrivalTime: string; // Giờ đến, ví dụ: "13:01"
-  fromStation: string; // Ga khởi hành, ví dụ: "Ga Hà Nội"
-  fromCity: string; // Thành phố khởi hành, ví dụ: "Hà Nội"
-  toStation: string; // Ga đến, ví dụ: "Ga Đà Nẵng"
-  toCity: string; // Thành phố đến, ví dụ: "Đà Nẵng"
-  operator: string; // Nhà điều hành, ví dụ: "LOTUS TRAIN"
-  trainName: string; // Tên tàu, ví dụ: "SE19"
-  coachType: string; // Loại toa, ví dụ: "B"
-  coachName: string; // Tên toa, ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin"
-  adultPrice: string; // Giá vé người lớn, ví dụ: "3.600.000"
-  childPrice: string; // Giá vé trẻ em, ví dụ: "3.600.000"
-  amenities: {
-    wifi?: boolean; // Có WiFi không
-    powerPlug?: boolean; // Có ổ cắm không
-    food?: boolean; // Có đồ ăn không
-    tv?: boolean; // Có TV không
-    massageChair?: boolean; // Có ghế massage không
-  };
-  isLuxury: boolean; // Có phải tàu cao cấp không
-  fromAddress?: string; // Địa chỉ ga đi, ví dụ: "Ga Hà Nội"
-  toAddress?: string; // Địa chỉ ga đến, ví dụ: "Ga Đà Nẵng"
-  fromLatitude?: number; // Vĩ độ ga đi, ví dụ: 21.025062
-  fromLongitude?: number; // Kinh độ ga đi, ví dụ: 105.841181
-  departureDate: string; // Ngày khởi hành, ví dụ: "2025-04-10"
-}
-
-// Định nghĩa kiểu dữ liệu cho thông tin toa (dùng trong popup chọn ghế)
-interface SeatType {
-  coach: string; // Tên toa, ví dụ: "Toa 1"
-  type: string; // Loại toa, ví dụ: "Ngồi mềm điều hòa"
-  availability: number; // Số ghế còn trống, ví dụ: 16
-  price: string; // Giá vé, ví dụ: "3600K"
-}
-
-// Định nghĩa kiểu dữ liệu cho bộ lọc thời gian
-type TimeFilter = {
-  morning: boolean; // Lọc chuyến sáng (00:00 AM - 11:59 AM)
-  afternoon: boolean; // Lọc chuyến chiều (12:00 PM - 06:59 PM)
-  evening: boolean; // Lọc chuyến tối (07:00 PM - 11:59 PM)
-  all: boolean; // Chọn tất cả thời gian
-};
-
-// Định nghĩa kiểu dữ liệu cho bộ lọc nhà điều hành
-type OperatorFilter = {
-  livitrans: boolean; // Lọc nhà điều hành LIVITRANS
-  newLivitrans: boolean; // Lọc nhà điều hành New Livitrans
-  lotusTrain: boolean; // Lọc nhà điều hành LOTUS TRAIN
-  all: boolean; // Chọn tất cả nhà điều hành
-};
-
-// Định nghĩa kiểu dữ liệu cho tất cả bộ lọc
-type FilterTypes = {
-  time: TimeFilter; // Bộ lọc thời gian
-  operator: OperatorFilter; // Bộ lọc nhà điều hành
-  amenities: Record<string, boolean>; // Bộ lọc tiện nghi (wifi, food,...)
-  pickup: Record<string, boolean>; // Bộ lọc điểm đón
-  dropoff: Record<string, boolean>; // Bộ lọc điểm trả
-};
 
 // Component thanh lọc (FilterSidebar) để người dùng lọc chuyến tàu
 const FilterSidebar: React.FC<{

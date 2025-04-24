@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import HeaderSelectionPopup, { SeatType } from "./HeaderSeat";
-import SeatSelection, { Seat } from "./SeatSelection";
+import HeaderSelectionPopup from "./HeaderSeat";
+import SeatSelection from "./SeatSelection";
+import { HeaderSelectionProps, Seat } from "../../Entity/Entity";
 
 const generateSeatData = (coach: string, type: string, availability: number): Seat[] => {
   const totalSeats = 64;
@@ -21,22 +22,6 @@ const generateSeatData = (coach: string, type: string, availability: number): Se
   return seats;
 };
 
-interface HeaderSelectionProps {
-  departure: string;
-  arrival: string;
-  date: string;
-  trainName: string;
-  seatTypes: SeatType[];
-  onCoachClick: (coach: string) => void;
-  onClose?: () => void;
-  onContinue?: () => void;
-  tripDirection?: 'outbound' | 'return';
-  roundTrip?: boolean;
-  selectedOutboundTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-  selectedReturnTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-  setSelectedOutboundTrip?: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string; seats?: string[] } | null>>;
-  setSelectedReturnTrip?: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string; seats?: string[] } | null>>;
-}
 
 const HeaderSelection: React.FC<HeaderSelectionProps> = ({
   departure,

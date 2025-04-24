@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaGoogle, FaMicrosoft, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 import Breadcrumb from '../BreadCrumb';
+import { FormErrors } from '../../Entity/Entity';
 
 // Ép kiểu icon
 const CFaFacebook = FaFacebook as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -13,12 +14,6 @@ const CFaEnvelope = FaEnvelope as unknown as React.FC<React.SVGProps<SVGSVGEleme
 const CFaLock = FaLock as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const CFaUser = FaUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 
-interface FormErrors {
-    email?: string;
-    password?: string;
-    name?: string;
-    confirmPassword?: string;
-}
 
 // Layout chung cho cả LoginForm và SignupForm
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

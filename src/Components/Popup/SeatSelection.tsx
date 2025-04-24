@@ -1,30 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-export interface Seat {
-  seatNumber: string;
-  isAvailable: boolean;
-  type: string;
-  tier?: number;
-  compartment?: number;
-}
-
-export interface SeatSelectionProps {
-  coach: string;
-  seats: Seat[];
-  onSeatClick?: (seatNumber: string) => void;
-  totalAvailableSeats?: number;
-  onContinue?: () => void;
-  onBook?: (selectedSeats: string[]) => void;
-  departure?: string;
-  arrival?: string;
-  date?: string;
-  trainName?: string;
-  tripDirection?: 'outbound' | 'return';
-  roundTrip?: boolean; // Thêm prop roundTrip vào giao diện
-  selectedOutboundTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-  selectedReturnTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-}
+import { SeatSelectionProps } from "../../Entity/Entity";
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({
   coach,
@@ -75,12 +51,27 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         tripDirection,
       });
 
+      // Đảm bảo dữ liệu đầy đủ trong selectedOutboundTrip và selectedReturnTrip
+      const outboundTripData = selectedOutboundTrip || {
+        operator: "",
+        departureTime: "",
+        seats: selectedSeats,
+        departure: departure || "",
+        arrival: arrival || "",
+        date: date?.split('/').reverse().join('-') || "",
+        trainName: trainName || "",
+        coach: coach || "",
+        pricePerSeat: 0,
+      };
+
+      const returnTripData = selectedReturnTrip || null;
+
       navigate("/payment", {
         state: {
-          outboundTrip: selectedOutboundTrip,
-          returnTrip: roundTrip ? selectedReturnTrip : null,
-          outboundSeats: selectedOutboundTrip?.seats || [],
-          returnSeats: selectedReturnTrip?.seats || [],
+          outboundTrip: outboundTripData,
+          returnTrip: roundTrip ? returnTripData : null,
+          outboundSeats: selectedSeats,
+          returnSeats: roundTrip && selectedReturnTrip ? selectedReturnTrip.seats : [],
         },
       });
     }

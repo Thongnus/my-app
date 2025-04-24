@@ -1,97 +1,105 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
+import { useNavigate } from 'react-router-dom'; // Dùng để điều hướng sau khi submit form
+import DatePicker from 'react-datepicker'; // Thư viện chọn ngày
 import 'react-datepicker/dist/react-datepicker.css';
-import Select from 'react-select';
-import { provinces } from '../Data.js/provinces';
-import {
-  FaTrain,
+import Select from 'react-select'; // Thư viện dropdown với gợi ý
+import { provinces } from '../Data.js/provinces'; // Danh sách các ga
+import { FormData} from '../Entity/Entity'; // Định nghĩa kiểu dữ liệu cho form
+import {  
+FaTrain,
   FaExchangeAlt,
   FaCalendarAlt,
   FaUser,
 } from 'react-icons/fa';
 
+// Ép kiểu các icon từ Fa* thành React component
 const IconTrain = FaTrain as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconSwap = FaExchangeAlt as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconCalendar = FaCalendarAlt as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconPassenger = FaUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 
- export interface FormData {
-  departure: { value: string; label: string } | null;
-  destination: { value: string; label: string } | null;
-  departureDate: Date;
-  returnDate: Date | null;
-  passengers: string;
-  roundTrip: boolean;
-}
+// Định nghĩa kiểu dữ liệu cho form
 
+// Định nghĩa kiểu dữ liệu cho lỗi của form
 interface FormErrors {
-  departure?: string;
-  destination?: string;
-  passengers?: string;
+  departure?: string; // Lỗi điểm đi
+  destination?: string; // Lỗi điểm đến
+  passengers?: string; // Lỗi số hành khách
 }
 
 const TrainBookingForm = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook để điều hướng sau khi submit
+
+  // Quản lý dữ liệu form
   const [formData, setFormData] = useState<FormData>({
-    departure: null,
-    destination: null,
-    departureDate: new Date(),
-    returnDate: null,
-    passengers: '1',
-    roundTrip: false,
+    departure: null, // Điểm đi ban đầu là null
+    destination: null, // Điểm đến ban đầu là null
+    departureDate: new Date(), // Ngày đi mặc định là ngày hiện tại
+    returnDate: null, // Ngày về mặc định là null
+    passengers: '1', // Số hành khách mặc định là 1
+    roundTrip: false, // Mặc định không phải chuyến khứ hồi
+    ticketCollector: '', // Thêm trường ticketCollector mặc định rỗng
+    passenger: '', // Thêm trường passenger mặc định rỗng
   });
+
+  // Quản lý lỗi của form
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // Hàm đảo ngược điểm đi và điểm đến
   const swapStations = () => {
     setFormData(prev => ({
       ...prev,
-      departure: prev.destination,
-      destination: prev.departure,
+      departure: prev.destination, // Điểm đi thành điểm đến
+      destination: prev.departure, // Điểm đến thành điểm đi
     }));
   };
 
+  // Kiểm tra dữ liệu form trước khi submit
   const validateForm = () => {
     const newErrors: FormErrors = {};
     if (!formData.departure) {
-      newErrors.departure = 'Vui lòng chọn điểm đi';
+      newErrors.departure = 'Vui lòng chọn điểm đi'; // Báo lỗi nếu chưa chọn điểm đi
     }
     if (!formData.destination) {
-      newErrors.destination = 'Vui lòng chọn điểm đến';
+      newErrors.destination = 'Vui lòng chọn điểm đến'; // Báo lỗi nếu chưa chọn điểm đến
     }
     if (!formData.passengers || parseInt(formData.passengers) < 1) {
-      newErrors.passengers = 'Số hành khách phải từ 1 đến 10';
+      newErrors.passengers = 'Số hành khách phải từ 1 đến 10'; // Báo lỗi nếu số hành khách không hợp lệ
     }
     if (parseInt(formData.passengers) > 10) {
-      newErrors.passengers = 'Số hành khách tối đa là 10';
+      newErrors.passengers = 'Số hành khách tối đa là 10'; // Báo lỗi nếu số hành khách vượt quá 10
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0; // Trả về true nếu không có lỗi
   };
 
+  // Xử lý khi người dùng thay đổi số hành khách
   const handlePassengerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Chỉ cho phép giá trị từ 1 đến 10
     if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 10)) {
       setFormData(prev => ({ ...prev, passengers: value }));
-      setErrors(prev => ({ ...prev, passengers: undefined }));
+      setErrors(prev => ({ ...prev, passengers: undefined })); // Xóa lỗi nếu giá trị hợp lệ
     }
   };
 
+  // Xử lý khi người dùng nhấn nút "Tìm kiếm"
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (validateForm()) {
+      // Tạo query parameters từ dữ liệu form
       const params = new URLSearchParams({
-        from: formData.departure?.value|| '',
+        from: formData.departure?.value || '',
         to: formData.destination?.value || '',
         departureDate: formData.departureDate.toISOString(),
         returnDate: formData.returnDate ? formData.returnDate.toISOString() : '',
         passengers: formData.passengers,
         roundTrip: formData.roundTrip.toString(),
       });
-      console.log('Form submitted:', formData);
-      navigate('/train-search-results'
-        + '?' + params.toString(), {
+      console.log('Form submitted:', formData); // Log dữ liệu form
+
+      // Điều hướng đến trang kết quả tìm kiếm với query parameters và state
+      navigate('/train-search-results' + '?' + params.toString(), {
         state: {
           from: formData.departure?.value,
           to: formData.destination?.value,
@@ -100,8 +108,7 @@ const TrainBookingForm = () => {
           passengers: formData.passengers,
           roundTrip: formData.roundTrip,
         },
-      }
-      );
+      });
     }
   };
 
@@ -113,18 +120,19 @@ const TrainBookingForm = () => {
         </h1>
 
         <div className="bg-black bg-opacity-80 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-          {/* Header */}
+          {/* Header của form */}
           <div className="flex items-center px-6 py-4 border-b border-gray-600 text-yellow-400 font-semibold text-lg bg-black bg-opacity-50">
             <IconTrain className="mr-2" /> Tàu Hỏa
           </div>
 
-          {/* Form */}
+          {/* Nội dung form */}
           <div className="p-6">
             <div className="grid md:grid-cols-3 gap-6 mb-6">
+              {/* Chọn điểm đi */}
               <div>
                 <label className="block text-white mb-2 font-medium">Điểm Đi</label>
                 <Select
-                  options={provinces}
+                  options={provinces} // Danh sách ga từ provinces
                   value={formData.departure}
                   onChange={(newValue) =>
                     setFormData(prev => ({ ...prev, departure: newValue }))
@@ -136,7 +144,7 @@ const TrainBookingForm = () => {
                     control: (base) => ({
                       ...base,
                       backgroundColor: '#ffffff',
-                      borderColor: errors.departure ? '#ef4444' : '#e5e7eb',
+                      borderColor: errors.departure ? '#ef4444' : '#e5e7eb', // Viền đỏ nếu có lỗi
                       borderRadius: '0.5rem',
                       padding: '0.25rem',
                       transition: 'all 0.3s ease',
@@ -168,6 +176,7 @@ const TrainBookingForm = () => {
                 )}
               </div>
 
+              {/* Nút đảo chiều điểm đi và điểm đến */}
               <div className="flex items-center justify-center pt-6 md:pt-0">
                 <button
                   title="Đổi chiều"
@@ -178,6 +187,7 @@ const TrainBookingForm = () => {
                 </button>
               </div>
 
+              {/* Chọn điểm đến */}
               <div>
                 <label className="block text-white mb-2 font-medium">Điểm Đến</label>
                 <Select
@@ -227,6 +237,7 @@ const TrainBookingForm = () => {
             </div>
 
             <div className="grid md:grid-cols-4 gap-6 mb-6">
+              {/* Chọn ngày đi */}
               <div className="relative">
                 <label className="block text-white mb-2 font-medium">Ngày Đi</label>
                 <div className="relative">
@@ -241,6 +252,7 @@ const TrainBookingForm = () => {
                 </div>
               </div>
 
+              {/* Chọn ngày về (hiển thị nếu là khứ hồi) */}
               {formData.roundTrip && (
                 <div className="relative">
                   <label className="block text-white mb-2 font-medium">Ngày Về</label>
@@ -257,6 +269,7 @@ const TrainBookingForm = () => {
                 </div>
               )}
 
+              {/* Nhập số hành khách */}
               <div className="relative">
                 <label className="block text-white mb-2 font-medium">Hành Khách</label>
                 <div className="relative">
@@ -279,6 +292,7 @@ const TrainBookingForm = () => {
                 )}
               </div>
 
+              {/* Nút tìm kiếm */}
               <div className="flex items-end">
                 <button
                   onClick={handleSubmit}
@@ -289,6 +303,7 @@ const TrainBookingForm = () => {
               </div>
             </div>
 
+            {/* Checkbox chọn chuyến khứ hồi */}
             <div className="flex items-center mt-4">
               <input
                 type="checkbox"
@@ -298,7 +313,7 @@ const TrainBookingForm = () => {
                   setFormData(prev => ({
                     ...prev,
                     roundTrip: !prev.roundTrip,
-                    returnDate: !prev.roundTrip ? new Date() : null,
+                    returnDate: !prev.roundTrip ? new Date() : null, // Nếu bật khứ hồi, mặc định ngày về là ngày hiện tại
                   }))
                 }
                 className="mr-2 h-5 w-5 text-yellow-500 focus:ring-yellow-500 border-gray-300 rounded"

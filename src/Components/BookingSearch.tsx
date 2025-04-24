@@ -1,22 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom'; // Dùng để quản lý query parameters trong URL
 import { provinces } from '../Data.js/provinces'; // Danh sách các ga (provinces) với format { value: string, label: string }
+import { BookingSearchProps, Station } from '../Entity/Entity';
 
-// Định nghĩa kiểu dữ liệu cho props của component BookingSearch
-interface BookingSearchProps {
-  from: string; // Điểm đi (giá trị value của ga), ví dụ: "hanoi"
-  to: string; // Điểm đến (giá trị value của ga), ví dụ: "danang"
-  departureDate: Date; // Ngày đi
-  returnDate: Date; // Ngày về (dành cho chuyến khứ hồi)
-  passengers: string; // Số hành khách, ví dụ: "1"
-  roundTrip: boolean; // Có phải chuyến khứ hồi không: true/false
-}
 
-// Định nghĩa kiểu dữ liệu cho một ga (station)
-interface Station {
-  value: string; // Giá trị của ga, ví dụ: "hanoi"
-  label: string; // Tên hiển thị của ga, ví dụ: "Hà Nội"
-}
 
 const BookingSearch: React.FC<BookingSearchProps> = ({
   from, // Điểm đi từ props
