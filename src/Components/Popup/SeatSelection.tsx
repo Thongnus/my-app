@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SeatSelectionProps, Coach, Trip } from "../../Entity/Entity";
 import { parsePrice, formatPrice } from '../../utils/priceUtils';
+import { log } from "console";
 
 interface TripData {
   operator: string;
@@ -96,8 +97,13 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
     onSeatClick?.(seatNumber);
   };
 
+
   // Hàm xử lý khi click nút đặt vé/tiếp tục
   const handleContinue = () => {
+    console.log('Selected Seats:', selectedSeats);
+    console.log('Trip Direction:', tripDirection);
+    console.log('Round Trip:', roundTrip);
+    
     if (selectedSeats.length === 0) {
       alert("Vui lòng chọn ghế trước khi tiếp tục!");
       return;
@@ -123,11 +129,32 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         pricePerSeat: selectedOutboundTrip?.pricePerSeat || 0,
         totalPrice: totalPrice,
         total: totalPrice
-      },
-      returnTrip: roundTrip ? {
+      }
+    };
+
+    // Nếu là chuyến khứ hồi và đang ở chuyến đi
+    if (roundTrip && tripDirection === 'outbound') {
+      // Cập nhật state và chuyển sang tab chuyến về
+      onContinue?.({
+        tripDirection: 'return',
+        roundTrip: true,
+        selectedSeats: selectedSeats
+      });
+      return;
+    }
+
+    // Nếu là chuyến khứ hồi và đang ở chuyến về
+    if (roundTrip && tripDirection === 'return') {
+      // Kiểm tra xem đã có thông tin chuyến đi chưa
+      if (!selectedOutboundTrip || !selectedOutboundTrip.seats || selectedOutboundTrip.seats.length === 0) {
+        alert("Vui lòng chọn ghế cho chuyến đi trước!");
+        return;
+      }
+
+      navigationState.returnTrip = {
         operator: selectedReturnTrip?.operator || '',
         departureTime: selectedReturnTrip?.departureTime || '',
-        seats: [],
+        seats: selectedSeats,
         departure: departure || '',
         arrival: arrival || '',
         date: date || '',
@@ -135,10 +162,10 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         coach: coach,
         coachType: coach.type,
         pricePerSeat: selectedReturnTrip?.pricePerSeat || 0,
-        totalPrice: 0,
-        total: 0
-      } : undefined
-    };
+        totalPrice: totalPrice,
+        total: totalPrice
+      };
+    }
 
     console.log('Navigation State:', navigationState);
     navigate("/payment", { state: navigationState });
@@ -389,7 +416,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
           onClick={handleContinue}
           className="bg-orange-500 text-white px-6 py-2 sm:px-4 sm:py-1.5 rounded-lg flex items-center text-sm sm:text-xs hover:bg-orange-600 transition-colors cursor-pointer"
         >
-          {roundTrip && tripDirection === "outbound" ? "Tiếp tục" : "Đặt vé"}
+          {showBookButton ? 'Đặt vé' : 'Tiếp tục'}
         </button>
       </div>
     </div>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom'; // Dùng để quản lý query parameters trong URL
 import { provinces } from '../Data.js/provinces'; // Danh sách các ga (provinces) với format { value: string, label: string }
 import { BookingSearchProps, Station } from '../Entity/Entity';
-
-
+import DatePicker from    'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from 'react-router-dom';
 
 const BookingSearch: React.FC<BookingSearchProps> = ({
   from, // Điểm đi từ props
@@ -14,6 +15,7 @@ const BookingSearch: React.FC<BookingSearchProps> = ({
 }) => {
   // Quản lý query parameters trong URL
   const [searchParams, setSearchParams] = useSearchParams(); // searchParams chứa các query parameters hiện tại, setSearchParams để cập nhật chúng
+  const navigate = useNavigate();
 
   // Quản lý loại chuyến: '1' (một chiều) hoặc '2' (khứ hồi)
   const [tripType, setTripType] = useState(roundTrip ? '2' : '1'); // Mặc định dựa trên prop roundTrip
@@ -26,13 +28,14 @@ const BookingSearch: React.FC<BookingSearchProps> = ({
 
   // Quản lý dữ liệu form
   const [formData, setFormData] = useState({
-    departure: { value: from, label: fromLabel }, // Thông tin ga đi: { value: "hanoi", label: "Hà Nội" }
-    destination: { value: to, label: toLabel }, // Thông tin ga đến: { value: "danang", label: "Đà Nẵng" }
-    departureDate: departureDate.toISOString().split('T')[0], // Ngày đi: "2025-04-10"
-    returnDate:
-      roundTrip && returnDate && !isNaN(returnDate.getTime())
-        ? returnDate.toISOString().split('T')[0] // Ngày về nếu có: "2025-04-20"
-        : '', // Nếu không có thì để rỗng
+    departure: { value: from, label: fromLabel },
+    destination: { value: to, label: toLabel },
+    departureDate: departureDate && !isNaN(departureDate.getTime()) 
+      ? departureDate.toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0],
+    returnDate: roundTrip && returnDate && !isNaN(returnDate.getTime())
+      ? returnDate.toISOString().split('T')[0]
+      : '',
   });
 
   // Quản lý gợi ý ga khi người dùng nhập
@@ -41,10 +44,15 @@ const BookingSearch: React.FC<BookingSearchProps> = ({
   const [showDepartureSuggestions, setShowDepartureSuggestions] = useState(false); // Hiển thị gợi ý ga đi: true/false
   const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false); // Hiển thị gợi ý ga đến: true/false
 
-  // Cập nhật formData khi props thay đổi (from, to, departureDate, returnDate, roundTrip)
+  // Cập nhật formData khi props thay đổi
   useEffect(() => {
     const updatedFromStation = provinces.find((p) => p.value === from);
     const updatedToStation = provinces.find((p) => p.value === to);
+    
+    // Kiểm tra tính hợp lệ của ngày
+    const isValidDepartureDate = departureDate && !isNaN(departureDate.getTime());
+    const isValidReturnDate = returnDate && !isNaN(returnDate.getTime());
+    
     setFormData({
       departure: {
         value: from,
@@ -54,13 +62,14 @@ const BookingSearch: React.FC<BookingSearchProps> = ({
         value: to,
         label: updatedToStation ? updatedToStation.label : '',
       },
-      departureDate: departureDate.toISOString().split('T')[0],
-      returnDate:
-        roundTrip && returnDate && !isNaN(returnDate.getTime())
-          ? returnDate.toISOString().split('T')[0]
-          : '',
+      departureDate: isValidDepartureDate 
+        ? departureDate.toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      returnDate: roundTrip && isValidReturnDate
+        ? returnDate.toISOString().split('T')[0]
+        : '',
     });
-    setTripType(roundTrip ? '2' : '1'); // Cập nhật loại chuyến
+    setTripType(roundTrip ? '2' : '1');
   }, [from, to, departureDate, returnDate, roundTrip]);
 
   // Xử lý khi người dùng nhập vào ô điểm đi hoặc điểm đến
@@ -144,11 +153,47 @@ const BookingSearch: React.FC<BookingSearchProps> = ({
 
   // Xử lý khi người dùng nhấn nút "Tìm chuyến"
   const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault(); // Ngăn form submit mặc định
+    e.preventDefault();
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
-      console.log('Lỗi:', errors); // Log lỗi nếu có
+      console.log('Lỗi:', errors);
       return;
+    }
+
+    // Kiểm tra và xử lý ngày hợp lệ
+    const departureDate = new Date(formData.departureDate);
+    const returnDate = roundTrip ? new Date(formData.returnDate) : null;
+
+    // Kiểm tra ngày đi phải hợp lệ
+    if (isNaN(departureDate.getTime())) {
+      console.log('Lỗi:', { departureDate: 'Ngày đi không hợp lệ' });
+      return;
+    }
+
+    // Kiểm tra ngày về nếu có
+    if (returnDate && isNaN(returnDate.getTime())) {
+      console.log('Lỗi:', { returnDate: 'Ngày về không hợp lệ' });
+      return;
+    }
+
+    // Kiểm tra ngày về phải sau ngày đi
+    if (returnDate && returnDate < departureDate) {
+      console.log('Lỗi:', { returnDate: 'Ngày về phải sau ngày đi' });
+      return;
+    }
+
+    // Tạo query parameters
+    const queryParams = new URLSearchParams({
+      from: formData.departure.value,
+      to: formData.destination.value,
+      departureDate: departureDate.toISOString().split('T')[0],
+      roundTrip: tripType === '2' ? 'true' : 'false',
+      passengers: '1',
+    });
+
+    // Thêm ngày về nếu là chuyến khứ hồi và ngày về hợp lệ
+    if (returnDate && !isNaN(returnDate.getTime())) {
+      queryParams.append('returnDate', returnDate.toISOString().split('T')[0]);
     }
 
     // Cập nhật query parameters trong URL
@@ -156,157 +201,155 @@ const BookingSearch: React.FC<BookingSearchProps> = ({
     newParams.set('from', formData.departure.value);
     newParams.set('to', formData.destination.value);
     newParams.set('departureDate', formData.departureDate);
-    newParams.set('returnDate', formData.returnDate || '');
+    if (formData.returnDate) {
+      newParams.set('returnDate', formData.returnDate);
+    }
     newParams.set('roundTrip', tripType === '2' ? 'true' : 'false');
-    newParams.set('passengers', '1'); // Số hành khách cố định là 1 (có thể thêm input để người dùng nhập)
-    setSearchParams(newParams); // Cập nhật URL
+    newParams.set('passengers', '1');
+    setSearchParams(newParams);
 
-    console.log("Bạn vừa bấm tìm chuyến!", {
-      ...formData,
-      departureValue: formData.departure.value,
-      destinationValue: formData.destination.value,
-    });
+    // Điều hướng đến trang kết quả tìm kiếm
+    navigate(`/train-search-results?${queryParams.toString()}`);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-xl rounded-2xl p-4 md:p-6 max-w-full mx-auto mt-6 space-y-4 transition-all duration-300"
-    >
-      <div className="flex flex-wrap items-end gap-4 justify-center">
-        {/* Chọn loại chuyến: Một chiều hoặc Khứ hồi */}
-        <div className="flex flex-col items-start gap-2">
-          <label className="flex items-center space-x-2 text-gray-700 font-medium">
-            <input
-              type="radio"
-              name="TripType"
-              value="1"
-              checked={tripType === '1'}
-              onChange={(e) => setTripType(e.target.value)}
-              className="accent-blue-600"
-            />
-            <span>Một chiều</span>
-          </label>
-          <label className="flex items-center space-x-2 text-gray-700 font-medium">
-            <input
-              type="radio"
-              name="TripType"
-              value="2"
-              checked={tripType === '2'}
-              onChange={(e) => setTripType(e.target.value)}
-              className="accent-blue-600"
-            />
-            <span>Khứ hồi</span>
-          </label>
-        </div>
-
-        {/* Input điểm đi */}
-        <div className="w-48 relative">
-          <label className="block text-sm text-gray-600 font-semibold mb-1">Điểm đi</label>
-          <div className="relative">
-            <i className="fa fa-map-marker absolute top-3 left-3 text-gray-400" />
-            <input
-              type="text"
-              name="departure"
-              value={formData.departure.label}
-              onChange={(e) => handleInputChange(e, 'departure')}
-              onBlur={() => setShowDepartureSuggestions(false)} // Ẩn gợi ý khi mất focus
-              placeholder="Nhập ga đi..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
-              autoComplete="off"
-            />
-            {/* Danh sách gợi ý ga đi */}
-            {showDepartureSuggestions && (
-              <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-xl mt-1 max-h-40 overflow-y-auto shadow-lg">
-                {departureSuggestions.map((suggestion) => (
-                  <li
-                    key={suggestion.value}
-                    className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                    onMouseDown={() => handleSuggestionClick(suggestion, 'departure')} // Dùng onMouseDown để tránh onBlur chạy trước
-                  >
-                    {suggestion.label}
-                  </li>
-                ))}
-              </ul>
-            )}
+    <div className="bg-white shadow-lg rounded-lg p-6">
+      <form onSubmit={handleSubmit}>
+        <div className="flex flex-wrap items-end gap-4 justify-center">
+          {/* Chọn loại chuyến: Một chiều hoặc Khứ hồi */}
+          <div className="flex flex-col items-start gap-2">
+            <label className="flex items-center space-x-2 text-gray-700 font-medium">
+              <input
+                type="radio"
+                name="TripType"
+                value="1"
+                checked={tripType === '1'}
+                onChange={(e) => setTripType(e.target.value)}
+                className="accent-blue-600"
+              />
+              <span>Một chiều</span>
+            </label>
+            <label className="flex items-center space-x-2 text-gray-700 font-medium">
+              <input
+                type="radio"
+                name="TripType"
+                value="2"
+                checked={tripType === '2'}
+                onChange={(e) => setTripType(e.target.value)}
+                className="accent-blue-600"
+              />
+              <span>Khứ hồi</span>
+            </label>
           </div>
-        </div>
 
-        {/* Input điểm đến */}
-        <div className="w-48 relative">
-          <label className="block text-sm text-gray-600 font-semibold mb-1">Điểm đến</label>
-          <div className="relative">
-            <i className="fa fa-map-marker absolute top-3 left-3 text-gray-400" />
-            <input
-              type="text"
-              name="destination"
-              value={formData.destination.label}
-              onChange={(e) => handleInputChange(e, 'destination')}
-              onBlur={() => setShowDestinationSuggestions(false)}
-              placeholder="Nhập ga đến..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
-              autoComplete="off"
-            />
-            {/* Danh sách gợi ý ga đến */}
-            {showDestinationSuggestions && (
-              <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-xl mt-1 max-h-40 overflow-y-auto shadow-lg">
-                {destinationSuggestions.map((suggestion) => (
-                  <li
-                    key={suggestion.value}
-                    className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                    onMouseDown={() => handleSuggestionClick(suggestion, 'destination')}
-                  >
-                    {suggestion.label}
-                  </li>
-                ))}
-              </ul>
-            )}
+          {/* Input điểm đi */}
+          <div className="w-48 relative">
+            <label className="block text-sm text-gray-600 font-semibold mb-1">Điểm đi</label>
+            <div className="relative">
+              <i className="fa fa-map-marker absolute top-3 left-3 text-gray-400" />
+              <input
+                type="text"
+                name="departure"
+                value={formData.departure.label}
+                onChange={(e) => handleInputChange(e, 'departure')}
+                onBlur={() => setShowDepartureSuggestions(false)} // Ẩn gợi ý khi mất focus
+                placeholder="Nhập ga đi..."
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                autoComplete="off"
+              />
+              {/* Danh sách gợi ý ga đi */}
+              {showDepartureSuggestions && (
+                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-xl mt-1 max-h-40 overflow-y-auto shadow-lg">
+                  {departureSuggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.value}
+                      className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+                      onMouseDown={() => handleSuggestionClick(suggestion, 'departure')} // Dùng onMouseDown để tránh onBlur chạy trước
+                    >
+                      {suggestion.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Input ngày đi */}
-        <div className="w-40">
-          <label className="block text-sm text-gray-600 font-semibold mb-1">Ngày đi</label>
-          <div className="relative">
-            <i className="fa fa-calendar absolute top-3 left-3 text-gray-400" />
-            <input
-              type="date"
-              name="departureDate"
-              value={formData.departureDate}
-              onChange={handleDateChange}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
-            />
+          {/* Input điểm đến */}
+          <div className="w-48 relative">
+            <label className="block text-sm text-gray-600 font-semibold mb-1">Điểm đến</label>
+            <div className="relative">
+              <i className="fa fa-map-marker absolute top-3 left-3 text-gray-400" />
+              <input
+                type="text"
+                name="destination"
+                value={formData.destination.label}
+                onChange={(e) => handleInputChange(e, 'destination')}
+                onBlur={() => setShowDestinationSuggestions(false)}
+                placeholder="Nhập ga đến..."
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                autoComplete="off"
+              />
+              {/* Danh sách gợi ý ga đến */}
+              {showDestinationSuggestions && (
+                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-xl mt-1 max-h-40 overflow-y-auto shadow-lg">
+                  {destinationSuggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.value}
+                      className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+                      onMouseDown={() => handleSuggestionClick(suggestion, 'destination')}
+                    >
+                      {suggestion.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Input ngày về (hiển thị nếu là khứ hồi) */}
-        {tripType === '2' && (
+          {/* Input ngày đi */}
           <div className="w-40">
-            <label className="block text-sm text-gray-600 font-semibold mb-1">Ngày về</label>
+            <label className="block text-sm text-gray-600 font-semibold mb-1">Ngày đi</label>
             <div className="relative">
               <i className="fa fa-calendar absolute top-3 left-3 text-gray-400" />
               <input
                 type="date"
-                name="returnDate"
-                value={formData.returnDate}
+                name="departureDate"
+                value={formData.departureDate}
                 onChange={handleDateChange}
                 className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
               />
             </div>
           </div>
-        )}
 
-        {/* Nút tìm kiếm */}
-        <div>
-          <button
-            type="submit"
-            className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition duration-200 shadow-md mt-6"
-          >
-            🚆 Tìm chuyến
-          </button>
+          {/* Input ngày về (hiển thị nếu là khứ hồi) */}
+          {tripType === '2' && (
+            <div className="w-40">
+              <label className="block text-sm text-gray-600 font-semibold mb-1">Ngày về</label>
+              <div className="relative">
+                <i className="fa fa-calendar absolute top-3 left-3 text-gray-400" />
+                <input
+                  type="date"
+                  name="returnDate"
+                  value={formData.returnDate}
+                  onChange={handleDateChange}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Nút tìm kiếm */}
+          <div>
+            <button
+              type="submit"
+              className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition duration-200 shadow-md mt-6"
+            >
+              🚆 Tìm chuyến
+            </button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

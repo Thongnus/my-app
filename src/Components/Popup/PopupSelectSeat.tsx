@@ -63,34 +63,47 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({
 
   const handleBook = (selectedSeats: string[]) => {
     if (tripDirection === "outbound" && setSelectedOutboundTrip) {
-      setSelectedOutboundTrip((prev) =>
-        prev ? { ...prev, seats: selectedSeats } : {
-          operator: "",
-          departureTime: "",
-          seats: selectedSeats,
-          departure: departure,
-          arrival: arrival,
-          date: date,
-          trainName: trainName,
-          coach: selectedCoach || "",
-          pricePerSeat: (coach.find(c => c.coach === selectedCoach)?.price || 0) / 1000
+      const selectedCoachInfo = coach.find(c => c.coach === selectedCoach);
+      
+      setSelectedOutboundTrip((prev) => {
+        if (prev) {
+          return { ...prev, seats: selectedSeats };
+        } else {
+          return {
+            operator: "",
+            departureTime: "",
+            seats: selectedSeats,
+            departure: departure,
+            arrival: arrival,
+            date: date,
+            trainName: trainName,
+            coach: selectedCoach || "",
+            pricePerSeat: selectedCoachInfo ? selectedCoachInfo.price / 1000 : 0
+          };
         }
-      );
+      });
     } else if (tripDirection === "return" && setSelectedReturnTrip) {
-      setSelectedReturnTrip((prev) =>
-        prev ? { ...prev, seats: selectedSeats } : {
-          operator: "",
-          departureTime: "",
-          seats: selectedSeats,
-          departure: departure,
-          arrival: arrival,
-          date: date,
-          trainName: trainName,
-          coach: selectedCoach || "",
-          pricePerSeat: (coach.find(c => c.coach === selectedCoach)?.price || 0) / 1000
+      const selectedCoachInfo = coach.find(c => c.coach === selectedCoach);
+      
+      setSelectedReturnTrip((prev) => {
+        if (prev) {
+          return { ...prev, seats: selectedSeats };
+        } else {
+          return {
+            operator: "",
+            departureTime: "",
+            seats: selectedSeats,
+            departure: departure,
+            arrival: arrival,
+            date: date,
+            trainName: trainName,
+            coach: selectedCoach || "",
+            pricePerSeat: selectedCoachInfo ? selectedCoachInfo.price / 1000 : 0
+          };
         }
-      );
+      });
     }
+    
     console.log("Xử lý đặt vé từ HeaderSelection:", {
       departure,
       arrival,

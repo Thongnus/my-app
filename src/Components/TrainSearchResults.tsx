@@ -967,25 +967,36 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
   };
 
   const handleContinueToReturnTrip = () => {
-    if (!selectedOutboundTrip || !selectedOutboundTrip.seats || selectedOutboundTrip.seats.length === 0) {
-      alert("Vui lòng chọn ghế cho chuyến đi trước khi tiếp tục!");
-      return;
-    }
-    if (selectedTripForSeats) {
-      setSelectedOutboundTrip({
-        operator: selectedTripForSeats.operator,
-        departureTime: selectedTripForSeats.departureTime,
-        seats: selectedOutboundTrip?.seats || [],
-        departure: selectedTripForSeats.fromStation,
-        arrival: selectedTripForSeats.toStation,
-        date: selectedTripForSeats.date,
-        trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-        coach: selectedOutboundTrip?.coach || "",
-        pricePerSeat: parsePrice(selectedOutboundTrip.pricePerSeat)
-      });
+    console.log('Selected Outbound Trip:', selectedOutboundTrip);
+    console.log('Selected Trip For Seats:', selectedTripForSeats);
+    console.log('Trip Direction:', tripDirection);
+    console.log('Round Trip:', roundTrip);
+    
+    
+
+    // Cập nhật thông tin chuyến đi
+    const updatedOutboundTrip = {
+      operator: selectedTripForSeats?.operator || "",
+      departureTime: selectedTripForSeats?.departureTime || "",
+      seats: selectedOutboundTrip?.seats || [],
+      departure: selectedTripForSeats?.fromStation || "",
+      arrival: selectedTripForSeats?.toStation || "",
+      date: selectedTripForSeats?.departureDate || "",
+      trainName: selectedTripForSeats?.trainName || selectedTripForSeats?.coachName || "",
+      coach: selectedOutboundTrip?.coach || "",
+      pricePerSeat: parsePrice(selectedOutboundTrip?.pricePerSeat || 0)
+    };
+
+    console.log('Updating outbound trip with:', updatedOutboundTrip);
+
+    // Cập nhật state và đợi state được cập nhật
+    setSelectedOutboundTrip(updatedOutboundTrip);
+    
+    // Đợi state được cập nhật trước khi chuyển tab
+    setTimeout(() => {
       setTripDirection('return');
       closeSeatSelectionPopup();
-    }
+    }, 100);
   };
 
   const parsePrice = (price: string | number): number => {
@@ -1078,7 +1089,55 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
             coach={generateSeatTypes(selectedTripForSeats)}
             onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
             onClose={closeSeatSelectionPopup}
-            onContinue={handleContinueToReturnTrip}
+            onContinue={(state) => {
+              if (tripDirection === 'outbound') {
+                // Khởi tạo hoặc cập nhật selectedOutboundTrip với ghế đã chọn
+                if (state?.selectedSeats && selectedTripForSeats) {
+                  const newOutboundTrip = {
+                    operator: selectedTripForSeats.operator,
+                    departureTime: selectedTripForSeats.departureTime,
+                    seats: state.selectedSeats,
+                    departure: selectedTripForSeats.fromStation,
+                    arrival: selectedTripForSeats.toStation,
+                    date: selectedTripForSeats.departureDate,
+                    trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
+                    coach: selectedTripForSeats.coachName || "",
+                    pricePerSeat: selectedTripForSeats.adultPrice
+                  };
+                  
+                  setSelectedOutboundTrip(newOutboundTrip);
+                  
+                  // Chuyển sang tab chuyến về
+                  setTripDirection('return');
+                  closeSeatSelectionPopup();
+                }
+              } else {
+                // Xử lý chuyến về
+                if (state?.selectedSeats && selectedTripForSeats) {
+                  const newReturnTrip = {
+                    operator: selectedTripForSeats.operator,
+                    departureTime: selectedTripForSeats.departureTime,
+                    seats: state.selectedSeats,
+                    departure: selectedTripForSeats.fromStation,
+                    arrival: selectedTripForSeats.toStation,
+                    date: selectedTripForSeats.departureDate,
+                    trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
+                    coach: selectedTripForSeats.coachName || "",
+                    pricePerSeat: selectedTripForSeats.adultPrice
+                  };
+                  
+                  setSelectedReturnTrip(newReturnTrip);
+                  
+                  // Chuyển đến trang thanh toán
+                  navigate('/payment', {
+                    state: {
+                      outboundTrip: selectedOutboundTrip,
+                      returnTrip: newReturnTrip
+                    }
+                  });
+                }
+              }
+            }}
             tripDirection={tripDirection}
             roundTrip={roundTrip}
             selectedOutboundTrip={selectedOutboundTrip ? {
@@ -1103,64 +1162,8 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
               coach: selectedReturnTrip.coach,
               pricePerSeat: parsePrice(selectedReturnTrip.pricePerSeat)
             } : null}
-            setSelectedOutboundTrip={(value) => {
-              if (typeof value === 'function') {
-                setSelectedOutboundTrip((prev) => {
-                  const newValue = value(prev);
-                  if (!newValue) return null;
-                  return {
-                    ...newValue,
-                    seats: newValue.seats || [],
-                    departure: selectedTripForSeats.fromStation,
-                    arrival: selectedTripForSeats.toStation,
-                    date: selectedTripForSeats.departureDate,
-                    trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-                    coach: newValue.coach || "",
-                    pricePerSeat: parsePrice(newValue.pricePerSeat)
-                  };
-                });
-              } else {
-                if (!value) return null;
-                setSelectedOutboundTrip({
-                  ...value,
-                  seats: value.seats || [],
-                  departure: selectedTripForSeats.fromStation,
-                  arrival: selectedTripForSeats.toStation,
-                  date: selectedTripForSeats.departureDate,
-                  trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-                  coach: value.coach || "",
-                  pricePerSeat: parsePrice(value.pricePerSeat)
-                });
-              }
-            }}
-            setSelectedReturnTrip={(value) => {
-              if (typeof value === 'function') {
-                setSelectedReturnTrip((prev) => {
-                  const newValue = value(prev);
-                  if (!newValue) return null;
-                  return {
-                    ...newValue,
-                    departure: selectedTripForSeats.fromStation,
-                    arrival: selectedTripForSeats.toStation,
-                    date: selectedTripForSeats.departureDate,
-                    trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-                    coach: newValue.coach || "",
-                    pricePerSeat: parsePrice(newValue.pricePerSeat)
-                  };
-                });
-              } else {
-                if (!value) return null;
-                setSelectedReturnTrip({
-                  ...value,
-                  departure: selectedTripForSeats.fromStation,
-                  arrival: selectedTripForSeats.toStation,
-                  date: selectedTripForSeats.departureDate,
-                  trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-                  coach: value.coach || "",
-                  pricePerSeat: parsePrice(value.pricePerSeat)
-                });
-              }
-            }}
+            setSelectedOutboundTrip={setSelectedOutboundTrip}
+            setSelectedReturnTrip={setSelectedReturnTrip}
           />
         </div>
       )}

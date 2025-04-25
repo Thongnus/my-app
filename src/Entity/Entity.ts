@@ -56,53 +56,17 @@ export interface Coach {
     coach: Coach[];
     onCoachClick: (coach: string) => void;
     onClose?: () => void;
-    onContinue?: () => void;
+    onContinue?: (state?: { 
+      tripDirection: 'outbound' | 'return'; 
+      roundTrip: boolean;
+      selectedSeats?: string[];
+    }) => void;
     tripDirection?: 'outbound' | 'return';
     roundTrip?: boolean;
-    selectedOutboundTrip?: {
-      operator: string;
-      departureTime: string;
-      seats: string[];
-      departure: string;
-      arrival: string;
-      date: string;
-      trainName: string;
-      coach: string;
-      pricePerSeat: number;
-    } | null;
-    selectedReturnTrip?: {
-      operator: string;
-      departureTime: string;
-      seats: string[];
-      departure: string;
-      arrival: string;
-      date: string;
-      trainName: string;
-      coach: string;
-      pricePerSeat: number;
-    } | null;
-    setSelectedOutboundTrip?: React.Dispatch<React.SetStateAction<{
-      operator: string;
-      departureTime: string;
-      seats: string[];
-      departure: string;
-      arrival: string;
-      date: string;
-      trainName: string;
-      coach: string;
-      pricePerSeat: number;
-    } | null>>;
-    setSelectedReturnTrip?: React.Dispatch<React.SetStateAction<{
-      operator: string;
-      departureTime: string;
-      seats: string[];
-      departure: string;
-      arrival: string;
-      date: string;
-      trainName: string;
-      coach: string;
-      pricePerSeat: number;
-    } | null>>;
+    selectedOutboundTrip?: SelectedTrip | null;
+    selectedReturnTrip?: SelectedTrip | null;
+    setSelectedOutboundTrip?: React.Dispatch<React.SetStateAction<SelectedTrip | null>>;
+    setSelectedReturnTrip?: React.Dispatch<React.SetStateAction<SelectedTrip | null>>;
   }
   
 
@@ -120,7 +84,11 @@ export interface Coach {
     seats: Seat[];
     onSeatClick?: (seatNumber: string) => void;
     totalAvailableSeats?: number;
-    onContinue?: () => void;
+    onContinue?: (state?: { 
+      tripDirection: 'outbound' | 'return'; 
+      roundTrip: boolean;
+      selectedSeats?: string[];
+    }) => void;
     onBook?: (selectedSeats: string[]) => void;
     departure?: string;
     arrival?: string;
@@ -313,7 +281,7 @@ export interface FillFormTrip {
   pricePerSeat: number | string;
   total: number;
   coachType?: string;
-  selectedSeats?: string[];
+ 
 }
 
 export interface TripData {
@@ -329,5 +297,5 @@ export interface TripData {
   totalPrice?: number;
   total: number;
   coachType?: string;
-  selectedSeats?: string[];
+
 }
