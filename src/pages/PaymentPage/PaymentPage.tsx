@@ -10,25 +10,13 @@ import { TrainIcon } from 'lucide-react';
 import PassengerInfoForm from './PasengerInfoForm';
 import TripInfoCard from './TripInfoCard';
 import PaymentOptions from './PaymentOptions';
-import { FormDataPayment } from '../../Entity/Entity';
-
-// Định nghĩa kiểu dữ liệu cho trip
-interface Trip {
-  operator: string;
-  departureTime: string;
-  departure: string;
-  arrival: string;
-  date: string;
-  trainName: string;
-  coach: string;
-  seats: string[];
-  pricePerSeat: number;
-}
+import { Coach, FormDataPayment, FillFormTrip } from '../../Entity/Entity';
+import { PromoCode, samplePromoCodes } from '../../Entity/PromoCode';
 
 // Định nghĩa kiểu dữ liệu cho state từ useLocation
 interface LocationState {
-  outboundTrip: Trip;
-  returnTrip: Trip | null;
+  outboundTrip: FillFormTrip;
+  returnTrip: FillFormTrip | null;
   outboundSeats: string[];
   returnSeats: string[];
 }
@@ -37,7 +25,7 @@ const PaymentPage: React.FC = () => {
   const location = useLocation();
   const state = location.state as LocationState;
 
-  console.log("data", state?.returnTrip?.arrival);
+  console.log("data", state?.outboundTrip.total);
 
   const [formData, setFormData] = useState<FormDataPayment>({
     ticketCollector: {
@@ -54,7 +42,7 @@ const PaymentPage: React.FC = () => {
       nationality: '',
       identityType: '',
       icOrPassport: '',
-      passengerType: 'ADULT',
+      passengerType: '',
       contact: '',
     },
     paymentMethod: '',
@@ -65,22 +53,36 @@ const PaymentPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [promoCode, setPromoCode] = useState('');
-  const [promoApplied, setPromoApplied] = useState<{ applied: boolean; discount: number; message: string }>({
-    applied: false,
-    discount: 0,
-    message: '',
-  });
-  const [promoCodes, setPromoCodes] = useState<{ code: string; discount: number; minPrice: number; description: string }[]>([]);
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
   const [showPromoModal, setShowPromoModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const basePrice = useMemo(() => {
-    const outboundPrice = state?.outboundSeats?.length * (state?.outboundTrip?.pricePerSeat || 0);
-    const returnPrice = state?.returnTrip ? state?.returnSeats?.length * (state?.returnTrip?.pricePerSeat || 0) : 0;
+  // Tính tổng giá vé
+  const outboundTotal = state?.outboundTrip?.total || 0;
+  const returnTotal = state?.returnTrip?.total || 0;
+  const subtotal = outboundTotal + returnTotal;
+  const finalTotal = subtotal - discountAmount;
+
+  const getSeatsCount = (seats: string[] | undefined): number => {
+    return seats?.length || 0;
+  };
+
+  const basePrice: number = useMemo(() => {
+    const outboundPricePerSeat = state?.outboundTrip?.pricePerSeat ? parseInt(state.outboundTrip.pricePerSeat.toString()) || 0 : 0;
+    const returnPricePerSeat = state?.returnTrip?.pricePerSeat ? parseInt(state.returnTrip.pricePerSeat.toString()) || 0 : 0;
+
+    const outboundSeatsCount = getSeatsCount(state?.outboundSeats);
+    const returnSeatsCount = getSeatsCount(state?.returnSeats);
+    
+    const outboundPrice = outboundSeatsCount * outboundPricePerSeat;
+    const returnPrice = state?.returnTrip ? returnSeatsCount * returnPricePerSeat : 0;
+    
     return outboundPrice + returnPrice;
   }, [state]);
 
-  const discountRate = 10;
-  const maxDiscount = (basePrice * discountRate) / 100;
+  const discountRate: number = 10;
+  const maxDiscount: number = Math.floor((basePrice * discountRate) / 100);
 
   const fetchPromoCodes = useCallback(async () => {
     const mockApiResponse = [
@@ -91,13 +93,38 @@ const PaymentPage: React.FC = () => {
         description: 'Giảm 10% cho đơn hàng từ 2.000.000 VNĐ trở lên, tối đa ' + maxDiscount.toLocaleString() + ' VNĐ',
       },
     ];
-    setPromoCodes(mockApiResponse);
+    // setPromoCodes(mockApiResponse);
   }, [maxDiscount]);
 
   useEffect(() => {
     fetchPromoCodes();
   }, [fetchPromoCodes]);
 
+  // Lọc mã giảm giá khả dụng
+  const availablePromoCodes = useMemo(() => {
+    const currentDate = new Date();
+    return samplePromoCodes.filter(promo => 
+      promo.isActive && 
+      currentDate >= promo.startDate && 
+      currentDate <= promo.endDate &&
+      (!promo.usageLimit || !promo.usedCount || promo.usedCount < promo.usageLimit) &&
+      (promo.isPublic || (promo.userId === 'VIP_USER_ID')) // Thay 'VIP_USER_ID' bằng ID người dùng thực tế
+    );
+  }, []);
+
+  // Lấy danh sách danh mục
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(availablePromoCodes.map(promo => promo.category));
+    return Array.from(uniqueCategories);
+  }, [availablePromoCodes]);
+
+  // Lọc mã giảm giá theo danh mục
+  const filteredPromoCodes = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return availablePromoCodes;
+    }
+    return availablePromoCodes.filter(promo => promo.category === selectedCategory);
+  }, [availablePromoCodes, selectedCategory]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -138,49 +165,64 @@ const PaymentPage: React.FC = () => {
   }, [formData]);
 
   const applyPromoCode = () => {
-    if (!promoCode.trim()) {
-      setPromoApplied({ applied: false, discount: 0, message: '' });
+    // Nếu đã có mã được áp dụng, không cho phép áp dụng mã mới
+    if (appliedPromoCode) {
+      setErrors({ ...errors, promoCode: 'Bạn đã áp dụng một mã giảm giá. Vui lòng hủy mã hiện tại trước khi áp dụng mã mới.' });
       return;
     }
 
-    const promo = promoCodes.find((p) => p.code === promoCode);
+    if (!promoCode) {
+      setErrors({ ...errors, promoCode: 'Vui lòng nhập mã giảm giá' });
+      return;
+    }
+
+    // Tìm mã giảm giá trong danh sách
+    const promo = samplePromoCodes.find(p => p.code === promoCode);
     if (!promo) {
-      setPromoApplied({ applied: false, discount: 0, message: 'Mã khuyến mãi không hợp lệ' });
+      setErrors({ ...errors, promoCode: 'Mã giảm giá không hợp lệ' });
       return;
     }
 
-    if (basePrice < promo.minPrice) {
-      setPromoApplied({
-        applied: false,
-        discount: 0,
-        message: `Mã ${promoCode} chỉ áp dụng cho đơn hàng từ ${promo.minPrice.toLocaleString()} VNĐ trở lên`,
-      });
+    // Kiểm tra điều kiện áp dụng
+    const currentDate = new Date();
+    if (!promo.isActive || currentDate < promo.startDate || currentDate > promo.endDate) {
+      setErrors({ ...errors, promoCode: 'Mã giảm giá đã hết hạn' });
       return;
     }
 
-    const discount = (basePrice * promo.discount) / 100;
-    const appliedDiscount = Math.min(discount, maxDiscount);
-    setPromoApplied({
-      applied: true,
-      discount: appliedDiscount,
-      message: `Mã ${promoCode} đã được áp dụng! Giảm ${appliedDiscount.toLocaleString()} VNĐ.`,
-    });
-  };
+    if (promo.minOrderValue && subtotal < promo.minOrderValue) {
+      setErrors({ ...errors, promoCode: `Mã giảm giá chỉ áp dụng cho đơn hàng từ ${promo.minOrderValue.toLocaleString()} VNĐ` });
+      return;
+    }
 
-  const selectPromoCode = (code: string) => {
-    setPromoCode(code);
-    setShowPromoModal(false);
-    applyPromoCode();
+    if (promo.usageLimit && promo.usedCount && promo.usedCount >= promo.usageLimit) {
+      setErrors({ ...errors, promoCode: 'Mã giảm giá đã hết lượt sử dụng' });
+      return;
+    }
+
+    // Tính số tiền giảm giá
+    let discount = 0;
+    if (promo.discountType === 'PERCENTAGE') {
+      discount = subtotal * (promo.discountValue / 100);
+      if (promo.maxDiscount) {
+        discount = Math.min(discount, promo.maxDiscount);
+      }
+    } else {
+      discount = promo.discountValue;
+    }
+
+    setDiscountAmount(discount);
+    setAppliedPromoCode(promoCode);
+    setPromoCode('');
+    setErrors({ ...errors, promoCode: '' });
   };
 
   const resetPromoCode = () => {
     setPromoCode('');
-    setPromoApplied({ applied: false, discount: 0, message: '' });
+    setAppliedPromoCode(null);
+    setDiscountAmount(0);
+    setErrors({ ...errors, promoCode: '' });
   };
-
-  const totalPrice = useMemo(() => {
-    return promoApplied.applied ? basePrice - promoApplied.discount : basePrice;
-  }, [basePrice, promoApplied]);
 
   const handlePayment = useCallback(async () => {
     if (!validateForm()) return;
@@ -264,16 +306,14 @@ const PaymentPage: React.FC = () => {
               title="Thông tin khởi hành"
               details={{
                 'Ngày khởi hành': state?.outboundTrip?.date || 'N/A',
-                'Giờ khởi hành': state?.outboundTrip?.departureTime || 'N/A',
                 'Ga Đi': state?.outboundTrip?.departure || 'N/A',
                 'Ga Đến': state?.outboundTrip?.arrival || 'N/A',
                 'Nhà Ga': state?.outboundTrip?.operator || 'LIVITRANS',
                 'Toa tàu': state?.outboundTrip?.trainName || 'N/A',
-                'Sàn': state?.outboundTrip?.coach || 'Giường',
-                'Số giường': state?.outboundSeats?.length.toString() || '0',
-                'Ghế đã chọn': state?.outboundSeats?.join(', ') || 'N/A',
-                'Giá vé': state?.outboundTrip?.pricePerSeat
-                  ? `${(state.outboundTrip.pricePerSeat * state.outboundSeats.length).toLocaleString()} VNĐ`
+                'Loại toa': state?.outboundTrip?.coachType || 'N/A',
+                'Ghế đã chọn': state?.outboundTrip?.seats?.join(', ') || 'N/A',
+                'Giá vé': state?.outboundTrip?.total
+                  ? `${state.outboundTrip.total.toLocaleString()} VNĐ`
                   : 'N/A',
               }}
             />
@@ -282,16 +322,14 @@ const PaymentPage: React.FC = () => {
                 title="Thông tin lượt về"
                 details={{
                   'Ngày khởi hành': state?.returnTrip?.date || 'N/A',
-                  'Giờ khởi hành': state?.returnTrip?.departureTime || 'N/A',
                   'Ga Đi': state?.returnTrip?.departure || 'N/A',
                   'Ga Đến': state?.returnTrip?.arrival || 'N/A',
                   'Nhà Ga': state?.returnTrip?.operator || 'LIVITRANS',
                   'Toa tàu': state?.returnTrip?.trainName || 'N/A',
-                  'Sàn': state?.returnTrip?.coach || 'Giường',
-                  'Số giường': state?.returnSeats?.length.toString() || '0',
-                  'Ghế đã chọn': state?.returnSeats?.join(', ') || 'N/A',
-                  'Giá vé': state?.returnTrip?.pricePerSeat
-                    ? `${(state.returnTrip.pricePerSeat * state.returnSeats.length).toLocaleString()} VNĐ`
+                  'Loại toa': state?.returnTrip?.coachType || 'N/A',
+                  'Ghế đã chọn': state?.returnTrip?.seats?.join(', ') || 'N/A',
+                  'Giá vé': state?.returnTrip?.total
+                    ? `${state.returnTrip.total.toLocaleString()} VNĐ`
                     : 'N/A',
                 }}
               />
@@ -307,47 +345,53 @@ const PaymentPage: React.FC = () => {
                   <TagIcon className="h-6 w-6 mr-2 text-blue-500 dark:text-blue-400" />
                   Mã Khuyến Mãi (Không bắt buộc)
                 </h2>
-                <motion.button
-                  onClick={() => setShowPromoModal(true)}
-                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm flex items-center"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <InformationCircleIcon className="h-5 w-5 mr-1" />
-                  Xem mã khả dụng
-                </motion.button>
+              
               </div>
-              <div className="flex space-x-4">
-                <div className="relative w-full">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    placeholder="Nhập mã khuyến mãi (VD: DISCOUNT10)"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition duration-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                  {promoCode && (
+              <div className="mt-4">
+                {!appliedPromoCode ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                      placeholder="Nhập mã giảm giá"
+                      className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={applyPromoCode}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    >
+                      Áp dụng
+                    </button>
+                    <button
+                      onClick={() => setShowPromoModal(true)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Xem mã khả dụng
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center bg-green-50 dark:bg-green-900 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600 dark:text-green-400">
+                        Đã áp dụng mã: {appliedPromoCode}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        (Giảm {discountAmount.toLocaleString()} VNĐ)
+                      </span>
+                    </div>
                     <button
                       onClick={resetPromoCode}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      className="text-green-600 dark:text-green-400 hover:underline"
                     >
-                      <XMarkIcon className="h-5 w-5" />
+                      Hủy
                     </button>
-                  )}
-                </div>
-                <motion.button
-                  onClick={applyPromoCode}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Áp dụng
-                </motion.button>
+                  </div>
+                )}
+                {errors.promoCode && (
+                  <p className="text-red-500 text-sm mt-1">{errors.promoCode}</p>
+                )}
               </div>
-              {promoApplied.message && (
-                <p className={`text-sm mt-2 ${promoApplied.applied ? 'text-green-500' : 'text-red-500'}`}>
-                  {promoApplied.message}
-                </p>
-              )}
             </motion.div>
             <motion.div
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
@@ -361,8 +405,8 @@ const PaymentPage: React.FC = () => {
                 <div className="flex justify-between">
                   <span>Vé lượt đi:</span>
                   <span>
-                    {state?.outboundTrip?.pricePerSeat
-                      ? `${(state.outboundTrip.pricePerSeat * state.outboundSeats.length).toLocaleString()} VNĐ`
+                    {state?.outboundTrip?.total
+                      ? `${state.outboundTrip.total.toLocaleString()} VNĐ`
                       : 'N/A'}
                   </span>
                 </div>
@@ -370,21 +414,21 @@ const PaymentPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span>Vé lượt về:</span>
                     <span>
-                      {state?.returnTrip?.pricePerSeat
-                        ? `${(state.returnTrip.pricePerSeat * state.returnSeats.length).toLocaleString()} VNĐ`
+                      {state?.returnTrip?.total
+                        ? `${state.returnTrip.total.toLocaleString()} VNĐ`
                         : 'N/A'}
                     </span>
                   </div>
                 )}
-                {promoApplied.applied && (
+                {appliedPromoCode && (
                   <div className="flex justify-between text-green-600 dark:text-green-400">
                     <span>Giảm giá:</span>
-                    <span>-{promoApplied.discount.toLocaleString()} VNĐ</span>
+                    <span>-{discountAmount.toLocaleString()} VNĐ</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-lg text-blue-600 dark:text-blue-400">
                   <span>Tổng:</span>
-                  <span>{totalPrice.toLocaleString()} VNĐ</span>
+                  <span>{finalTotal.toLocaleString()} VNĐ</span>
                 </div>
               </div>
             </motion.div>
@@ -469,7 +513,7 @@ const PaymentPage: React.FC = () => {
             >
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Xác nhận thanh toán</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Bạn sắp thanh toán <span className="font-bold text-blue-600 dark:text-blue-400">{totalPrice.toLocaleString()} VNĐ</span>. Vui lòng kiểm tra thông tin trước khi tiếp tục.
+                Bạn sắp thanh toán <span className="font-bold text-blue-600 dark:text-blue-400">{finalTotal.toLocaleString()} VNĐ</span>. Vui lòng kiểm tra thông tin trước khi tiếp tục.
               </p>
               <div className="flex justify-end space-x-4">
                 <button
@@ -490,57 +534,91 @@ const PaymentPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showPromoModal && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Danh sách mã khuyến mãi</h2>
+      {showPromoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Mã giảm giá khả dụng</h2>
+              <button
+                onClick={() => setShowPromoModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Danh mục */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`px-4 py-2 rounded-lg ${
+                  selectedCategory === 'all'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Tất cả
+              </button>
+              {categories.map(category => (
                 <button
-                  onClick={() => setShowPromoModal(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  key={category}
+                  onClick={() => setSelectedCategory(category || 'all')}
+                  className={`px-4 py-2 rounded-lg ${
+                    selectedCategory === category
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
-                  <XMarkIcon className="h-6 w-6" />
+                  {category}
                 </button>
-              </div>
-              {promoCodes.length > 0 ? (
-                <div className="space-y-4">
-                  {promoCodes.map((promo) => (
-                    <motion.div
-                      key={promo.code}
-                      className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition duration-200"
-                      onClick={() => selectPromoCode(promo.code)}
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-semibold text-gray-800 dark:text-white">{promo.code}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{promo.description}</p>
-                        </div>
-                        <button className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200">
-                          Chọn
-                        </button>
+              ))}
+            </div>
+            
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {filteredPromoCodes.length > 0 ? (
+                filteredPromoCodes.map((promo) => (
+                  <div
+                    key={promo.code}
+                    className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                    onClick={() => {
+                      setPromoCode(promo.code);
+                      setShowPromoModal(false);
+                    }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">{promo.code}</h3>
+                        <p className="text-gray-600 dark:text-gray-300">{promo.description}</p>
+                        {promo.minOrderValue && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            Áp dụng cho đơn từ {promo.minOrderValue.toLocaleString()} VNĐ
+                          </p>
+                        )}
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600 dark:text-green-400">
+                          {promo.discountType === 'PERCENTAGE' 
+                            ? `Giảm ${promo.discountValue}%`
+                            : `Giảm ${promo.discountValue.toLocaleString()} VNĐ`}
+                        </p>
+                        {promo.maxDiscount && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Tối đa {promo.maxDiscount.toLocaleString()} VNĐ
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
-                <p className="text-gray-600 dark:text-gray-300">Không có mã khuyến mãi nào khả dụng.</p>
+                <p className="text-gray-600 dark:text-gray-300 text-center py-4">
+                  Không có mã giảm giá nào khả dụng trong danh mục này.
+                </p>
               )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Tooltip id="tooltip" className="max-w-xs" />
     </div>

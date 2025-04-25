@@ -1,29 +1,13 @@
 import React from 'react';
+import { HeaderProps } from '../../Entity/Entity';
 
-// Định nghĩa kiểu dữ liệu cho thông tin toa (coach) của tàu
-export interface SeatType {
-  coach: string; // Tên toa, ví dụ: "Toa 1", "Toa 2",...
-  type: string; // Loại toa, ví dụ: "Ngồi mềm điều hòa" hoặc "Giường nằm khoang 6 điều hòa"
-  availability: number; // Số ghế còn trống trong toa, ví dụ: 11 ghế
-  price: string; // Giá vé, ví dụ: "333K" hoặc "572K - 664K" (khoảng giá nếu có nhiều loại ghế trong toa)
-}
-
-// Định nghĩa kiểu dữ liệu cho các props của component HeaderSelectionPopup
-export interface HeaderProps {
-  departure: string; // Điểm khởi hành, ví dụ: "Ga Hà Nội"
-  arrival: string; // Điểm đến, ví dụ: "Ga Đà Nẵng"
-  date: string; // Ngày đi, ví dụ: "10/04/2025"
-  trainName: string; // Tên tàu hoặc mã tàu, ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin"
-  seatTypes: SeatType[]; // Danh sách các toa của tàu, mỗi toa có thông tin như trên
-  onCoachClick?: (coach: string) => void; // Hàm callback khi người dùng click vào một toa, truyền tên toa (ví dụ: "Toa 1")
-}
-
+// Component hiển thị thông tin chuyến tàu và danh sách toa
 const HeaderSelectionPopup: React.FC<HeaderProps> = ({
   departure, // Điểm khởi hành
   arrival, // Điểm đến
   date, // Ngày đi
   trainName, // Tên tàu
-  seatTypes, // Danh sách các toa
+  Coach, // Danh sách các toa
   onCoachClick, // Hàm xử lý khi người dùng chọn toa
 }) => {
   return (
@@ -51,11 +35,11 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
           {/* Container chứa danh sách toa, có thể cuộn ngang nếu nhiều toa */}
           <div className="flex overflow-x-auto overflow-y-hidden scrollbar-hide">
             {/* Hiển thị danh sách toa theo thứ tự ngược (từ Toa 9 đến Toa 1) */}
-            {seatTypes.slice().reverse().map((seat, index) => (
+            {Coach.slice().reverse().map((seat, index) => (
               <div
                 key={index} // Key để React nhận diện từng phần tử trong danh sách
                 className="flex-shrink-0 w-48 h-24 bg-gray-100 border border-gray-300 rounded-l-lg flex items-center justify-between px-3 mr-1 last:mr-0 relative cursor-pointer hover:bg-gray-200"
-                onClick={() => onCoachClick?.(seat.coach)} // Khi click vào toa, gọi hàm onCoachClick và truyền tên toa (ví dụ: "Toa 1")
+                onClick={() => onCoachClick?.(seat.coach)} // Khi click vào toa, gọi hàm onCoachClick và truyền tên toa
               >
                 {/* Thông tin toa */}
                 <div className="overflow-hidden">
@@ -67,12 +51,12 @@ const HeaderSelectionPopup: React.FC<HeaderProps> = ({
                   <div className="text-sm text-gray-500 whitespace-nowrap">
                     <span>Còn {seat.availability} chỗ | </span> {/* Ví dụ: "Còn 11 chỗ" */}
                     <span>
-                      Giá {seat.price.includes('-') ? 'từ' : 'chỉ'} {seat.price} {/* Ví dụ: "Giá chỉ 333K" hoặc "Giá từ 572K - 664K" */}
+                      Giá {seat.price.toString().includes('-') ? 'từ' : 'chỉ'} {seat.price.toLocaleString()}K {/* Ví dụ: "Giá chỉ 333K" hoặc "Giá từ 572K - 664K" */}
                     </span>
                   </div>
                 </div>
                 {/* Thanh nối giữa các toa (trừ toa cuối cùng) */}
-                {index !== seatTypes.length - 1 && (
+                {index !== Coach.length - 1 && (
                   <div className="absolute right-0 h-12 w-1 bg-gray-300"></div>
                 )}
               </div>

@@ -27,20 +27,24 @@ export interface SelectedTrip {
   pricePerSeat: number;
 }
   // Định nghĩa kiểu dữ liệu cho thông tin toa (coach) của tàu
-export interface SeatType {
+export interface Coach {
+    [x: string]: any;
     coach: string; // Tên toa, ví dụ: "Toa 1", "Toa 2",...
     type: string; // Loại toa, ví dụ: "Ngồi mềm điều hòa" hoặc "Giường nằm khoang 6 điều hòa"
     availability: number; // Số ghế còn trống trong toa, ví dụ: 11 ghế
-    price: string; // Giá vé, ví dụ: "333K" hoặc "572K - 664K" (khoảng giá nếu có nhiều loại ghế trong toa)
+    price: number; // Giá vé, ví dụ: 333000 hoặc 572000
+    description: string;
+    amenities: string[];
   }
   
   // Định nghĩa kiểu dữ liệu cho các props của component HeaderSelectionPopup
   export interface HeaderProps {
+    [x: string]: any;
     departure: string; // Điểm khởi hành, ví dụ: "Ga Hà Nội"
     arrival: string; // Điểm đến, ví dụ: "Ga Đà Nẵng"
     date: string; // Ngày đi, ví dụ: "10/04/2025"
     trainName: string; // Tên tàu hoặc mã tàu, ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin"
-    seatTypes: SeatType[]; // Danh sách các toa của tàu, mỗi toa có thông tin như trên
+    Coach: Coach[]; // Danh sách các toa của tàu, mỗi toa có thông tin như trên
     onCoachClick?: (coach: string) => void; // Hàm callback khi người dùng click vào một toa, truyền tên toa (ví dụ: "Toa 1")
   }
   
@@ -49,16 +53,56 @@ export interface SeatType {
     arrival: string;
     date: string;
     trainName: string;
-    seatTypes: SeatType[];
+    coach: Coach[];
     onCoachClick: (coach: string) => void;
     onClose?: () => void;
     onContinue?: () => void;
     tripDirection?: 'outbound' | 'return';
     roundTrip?: boolean;
-    selectedOutboundTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-    selectedReturnTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-    setSelectedOutboundTrip?: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string; seats?: string[] } | null>>;
-    setSelectedReturnTrip?: React.Dispatch<React.SetStateAction<{ operator: string; departureTime: string; seats?: string[] } | null>>;
+    selectedOutboundTrip?: {
+      operator: string;
+      departureTime: string;
+      seats: string[];
+      departure: string;
+      arrival: string;
+      date: string;
+      trainName: string;
+      coach: string;
+      pricePerSeat: number;
+    } | null;
+    selectedReturnTrip?: {
+      operator: string;
+      departureTime: string;
+      seats: string[];
+      departure: string;
+      arrival: string;
+      date: string;
+      trainName: string;
+      coach: string;
+      pricePerSeat: number;
+    } | null;
+    setSelectedOutboundTrip?: React.Dispatch<React.SetStateAction<{
+      operator: string;
+      departureTime: string;
+      seats: string[];
+      departure: string;
+      arrival: string;
+      date: string;
+      trainName: string;
+      coach: string;
+      pricePerSeat: number;
+    } | null>>;
+    setSelectedReturnTrip?: React.Dispatch<React.SetStateAction<{
+      operator: string;
+      departureTime: string;
+      seats: string[];
+      departure: string;
+      arrival: string;
+      date: string;
+      trainName: string;
+      coach: string;
+      pricePerSeat: number;
+    } | null>>;
   }
   
 
@@ -66,12 +110,13 @@ export interface SeatType {
     seatNumber: string;
     isAvailable: boolean;
     type: string;
-    tier?: number;
     compartment?: number;
+    tier?: number;
+    price: number;
   }
   
   export interface SeatSelectionProps {
-    coach: string;
+    coach: Coach;
     seats: Seat[];
     onSeatClick?: (seatNumber: string) => void;
     totalAvailableSeats?: number;
@@ -82,9 +127,9 @@ export interface SeatType {
     date?: string;
     trainName?: string;
     tripDirection?: 'outbound' | 'return';
-    roundTrip?: boolean; // Thêm prop roundTrip vào giao diện
-    selectedOutboundTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
-    selectedReturnTrip?: { operator: string; departureTime: string; seats?: string[] } | null;
+    roundTrip?: boolean;
+    selectedOutboundTrip?: SelectedTrip | null;
+    selectedReturnTrip?: SelectedTrip | null;
   }
   
 
@@ -126,6 +171,8 @@ export interface TrainRoute {
 
   // Định nghĩa kiểu dữ liệu cho một chuyến tàu
   export interface Trip {
+    forEach(arg0: (Coach: { coach: string; type: string; availability: number; }) => void): unknown;
+    [x: string]: any;
     id: string; // ID của chuyến tàu, ví dụ: "VN-int-int-3382-..."
     departureTime: string; // Giờ khởi hành, ví dụ: "07:50 PM"
     duration: string; // Thời gian di chuyển, ví dụ: "17 hr 11 min*"
@@ -139,15 +186,9 @@ export interface TrainRoute {
     trainName: string; // Tên tàu, ví dụ: "SE19"
     coachType: string; // Loại toa, ví dụ: "B"
     coachName: string; // Tên toa, ví dụ: "SE19: VIP 2X - Private Twin-bed Cabin"
-    adultPrice: string; // Giá vé người lớn, ví dụ: "3.600.000"
-    childPrice: string; // Giá vé trẻ em, ví dụ: "3.600.000"
-    amenities: {
-      wifi?: boolean; // Có WiFi không
-      powerPlug?: boolean; // Có ổ cắm không
-      food?: boolean; // Có đồ ăn không
-      tv?: boolean; // Có TV không
-      massageChair?: boolean; // Có ghế massage không
-    };
+    adultPrice: number; // Giá vé người lớn, ví dụ: 3600000
+    childPrice: number; // Giá vé trẻ em, ví dụ: 3600000
+    amenities: amenities; // Tiện nghi trên tàu
     isLuxury: boolean; // Có phải tàu cao cấp không
     fromAddress?: string; // Địa chỉ ga đi, ví dụ: "Ga Hà Nội"
     toAddress?: string; // Địa chỉ ga đến, ví dụ: "Ga Đà Nẵng"
@@ -155,15 +196,15 @@ export interface TrainRoute {
     fromLongitude?: number; // Kinh độ ga đi, ví dụ: 105.841181
     departureDate: string; // Ngày khởi hành, ví dụ: "2025-04-10"
   }
-  
+  export interface   amenities {
+    wifi?: boolean; // Có WiFi không
+    powerPlug?: boolean; // Có ổ cắm không
+    food?: boolean; // Có đồ ăn không
+    tv?: boolean; // Có TV không
+    massageChair?: boolean; // Có ghế massage không
+  };
   // Định nghĩa kiểu dữ liệu cho thông tin toa (dùng trong popup chọn ghế)
-  export interface SeatType {
-    coach: string; // Tên toa, ví dụ: "Toa 1"
-    type: string; // Loại toa, ví dụ: "Ngồi mềm điều hòa"
-    availability: number; // Số ghế còn trống, ví dụ: 16
-    price: string; // Giá vé, ví dụ: "3600K"
-  }
-  
+
   // Định nghĩa kiểu dữ liệu cho bộ lọc thời gian
   export type TimeFilter = {
     morning: boolean; // Lọc chuyến sáng (00:00 AM - 11:59 AM)
@@ -226,6 +267,12 @@ export interface FormDataPayment {
   };
   paymentMethod: string; // Phương thức thanh toán (Momo, Payoo, ZaloPay, v.v.)
   agreeTerms: boolean; // Đồng ý với điều khoản và chính sách
+  outboundTrip?: {
+    totalPrice: number;
+  };
+  returnTrip?: {
+    totalPrice: number;
+  };
 }
 
 /**
@@ -251,4 +298,36 @@ export interface PaymentOptionsProps {
 export interface TripInfoCardProps {
   title: string; // Tiêu đề của card (VD: Thông tin khởi hành)
   details: { [key: string]: string }; // Đối tượng chứa thông tin chi tiết (VD: Ngày khởi hành, Ga Đi, v.v.)
+}
+
+// Định nghĩa kiểu dữ liệu cho trip
+export interface FillFormTrip {
+  operator: string;
+  departureTime: string;
+  departure: string;
+  arrival: string;
+  date: string;
+  trainName: string;
+  coach: Coach;
+  seats: string[];
+  pricePerSeat: number | string;
+  total: number;
+  coachType?: string;
+  selectedSeats?: string[];
+}
+
+export interface TripData {
+  operator: string;
+  departureTime: string;
+  seats?: string[];
+  departure?: string;
+  arrival?: string;
+  date?: string;
+  trainName?: string;
+  coach?: Coach;
+  pricePerSeat: number;
+  totalPrice?: number;
+  total: number;
+  coachType?: string;
+  selectedSeats?: string[];
 }

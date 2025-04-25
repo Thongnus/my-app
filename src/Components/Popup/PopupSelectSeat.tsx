@@ -8,27 +8,33 @@ const generateSeatData = (coach: string, type: string, availability: number): Se
   const availableSeats = Math.min(availability, totalSeats);
   const seats: Seat[] = [];
   const isSeatCoach = coach.includes("Toa 1") || coach.includes("Toa 2");
+  const isBedCoach = coach.includes("Toa 3") || coach.includes("Toa 4");
+  const isLuxuryBedCoach = coach.includes("Toa 5") || coach.includes("Toa 6");
 
   for (let i = 1; i <= totalSeats; i++) {
     seats.push({
       seatNumber: isSeatCoach ? `${i}` : `G${i}`,
       isAvailable: i <= availableSeats,
-      type: isSeatCoach ? "Ngồi mềm" : "Giường nằm",
-      tier: isSeatCoach ? undefined : (i % 3 === 0 ? 3 : i % 3),
+      type: isSeatCoach ? "Ngồi mềm" : (isLuxuryBedCoach ? "Giường nằm VIP" : "Giường nằm"),
       compartment: isSeatCoach ? undefined : Math.ceil(i / 6),
+      tier: isSeatCoach ? undefined : (i % 3 === 0 ? 3 : i % 3),
+      price: isSeatCoach 
+        ? 582000 
+        : isLuxuryBedCoach 
+          ? (i % 3 === 0 ? 906000 : i % 3 === 1 ? 856000 : 806000)
+          : (i % 3 === 0 ? 756000 : i % 3 === 1 ? 706000 : 656000)
     });
   }
 
   return seats;
 };
 
-
 const HeaderSelection: React.FC<HeaderSelectionProps> = ({
   departure,
   arrival,
   date,
   trainName,
-  seatTypes,
+  coach,
   onCoachClick,
   onClose,
   onContinue,
@@ -40,8 +46,8 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({
   setSelectedReturnTrip,
 }) => {
   const seatData: { [key: string]: Seat[] } = {};
-  seatTypes.forEach((seatType) => {
-    seatData[seatType.coach] = generateSeatData(seatType.coach, seatType.type, seatType.availability);
+  coach.forEach((Coach: { coach: string; type: string; availability: number }) => {
+    seatData[Coach.coach] = generateSeatData(Coach.coach, Coach.type, Coach.availability);
   });
 
   const [selectedCoach, setSelectedCoach] = useState<string | null>("Toa 1");
@@ -57,9 +63,33 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({
 
   const handleBook = (selectedSeats: string[]) => {
     if (tripDirection === "outbound" && setSelectedOutboundTrip) {
-      setSelectedOutboundTrip((prev) => prev ? { ...prev, seats: selectedSeats } : { operator: "", departureTime: "", seats: selectedSeats });
+      setSelectedOutboundTrip((prev) =>
+        prev ? { ...prev, seats: selectedSeats } : {
+          operator: "",
+          departureTime: "",
+          seats: selectedSeats,
+          departure: departure,
+          arrival: arrival,
+          date: date,
+          trainName: trainName,
+          coach: selectedCoach || "",
+          pricePerSeat: (coach.find(c => c.coach === selectedCoach)?.price || 0) / 1000
+        }
+      );
     } else if (tripDirection === "return" && setSelectedReturnTrip) {
-      setSelectedReturnTrip((prev) => prev ? { ...prev, seats: selectedSeats } : { operator: "", departureTime: "", seats: selectedSeats });
+      setSelectedReturnTrip((prev) =>
+        prev ? { ...prev, seats: selectedSeats } : {
+          operator: "",
+          departureTime: "",
+          seats: selectedSeats,
+          departure: departure,
+          arrival: arrival,
+          date: date,
+          trainName: trainName,
+          coach: selectedCoach || "",
+          pricePerSeat: (coach.find(c => c.coach === selectedCoach)?.price || 0) / 1000
+        }
+      );
     }
     console.log("Xử lý đặt vé từ HeaderSelection:", {
       departure,
@@ -71,7 +101,8 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({
     });
   };
 
-  const currentAvailability = seatTypes.find((st) => st.coach === selectedCoach)?.availability || 0;
+  const selectedCoachObj = coach.find((st: { coach: string; type: string; availability: number }) => st.coach === selectedCoach);
+  const currentAvailability = selectedCoachObj?.availability || 0;
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-2">
@@ -89,12 +120,12 @@ const HeaderSelection: React.FC<HeaderSelectionProps> = ({
           arrival={arrival}
           date={date}
           trainName={trainName}
-          seatTypes={seatTypes}
+          Coach={coach}
           onCoachClick={handleCoachClick}
         />
-        {selectedCoach && seatData[selectedCoach] && (
+        {selectedCoach && seatData[selectedCoach] && selectedCoachObj && (
           <SeatSelection
-            coach={selectedCoach}
+            coach={selectedCoachObj}
             seats={seatData[selectedCoach]}
             onSeatClick={handleSeatClick}
             totalAvailableSeats={currentAvailability}

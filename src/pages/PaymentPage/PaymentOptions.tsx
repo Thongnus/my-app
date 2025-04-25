@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 import { PaymentOptionsProps } from '../../Entity/Entity';
+import { useLocation } from 'react-router-dom';
  // Import interface từ entity.ts
 
 /**
@@ -11,11 +12,18 @@ import { PaymentOptionsProps } from '../../Entity/Entity';
 const PaymentOptions: React.FC<PaymentOptionsProps> = ({ formData, handleInputChange }) => {
   // State để quản lý tab đang active (mặc định là Ví Điện Tử)
   const [activeTab, setActiveTab] = useState('tab_EWallet');
+  const location = useLocation();
+  const state = location.state as any;
 
   // Hàm xử lý thay đổi tab khi người dùng click
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
   };
+
+  // Tính tổng giá vé
+  const totalPrice = state?.outboundTrip?.total || 0;
+  const returnPrice = state?.returnTrip?.total || 0;
+  const finalTotal = totalPrice + returnPrice;
 
   return (
     <motion.div
@@ -29,6 +37,26 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({ formData, handleInputCh
         <CreditCardIcon className="h-6 w-6 mr-2 text-blue-500 dark:text-blue-400" />
         Thanh toán
       </h2>
+
+      {/* Hiển thị tổng giá vé */}
+      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-gray-600 dark:text-gray-300">Giá vé lượt đi:</span>
+          <span className="font-semibold">{totalPrice.toLocaleString()} VNĐ</span>
+        </div>
+        {returnPrice > 0 && (
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600 dark:text-gray-300">Giá vé lượt về:</span>
+            <span className="font-semibold">{returnPrice.toLocaleString()} VNĐ</span>
+          </div>
+        )}
+        <div className="border-t border-gray-200 dark:border-gray-600 my-2"></div>
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-semibold text-gray-700 dark:text-white">Tổng cộng:</span>
+          <span className="text-lg font-bold text-orange-500">{finalTotal.toLocaleString()} VNĐ</span>
+        </div>
+      </div>
+
       <p className="text-gray-600 dark:text-gray-300 mb-4">Chọn phương thức thanh toán:</p>
 
       {/* Các tab để chọn phương thức thanh toán */}
