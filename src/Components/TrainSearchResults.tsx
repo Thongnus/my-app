@@ -86,41 +86,38 @@ const FilterSidebar: React.FC<{
   };
 
   return (
-    <div className="w-full md:w-1/4">
-      <div className="bg-white rounded-lg shadow-md p-4">
-        {/* Nút hiển thị bộ lọc trên mobile */}
-        <div className="md:hidden mb-4">
+    <div className="w-full lg:w-1/4">
+      <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+        <div className="md:hidden mb-3 sm:mb-4">
           <button
-            onClick={() => setShowFilters(!showFilters)} // Hiển thị/ẩn bộ lọc trên mobile
-            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded"
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-1 sm:gap-2 bg-purple-600 text-white px-3 sm:px-4 py-2 rounded text-sm sm:text-base w-full justify-center"
           >
             <CFaSlidersH /> <span>Lọc</span>
           </button>
         </div>
-        {/* Nội dung bộ lọc, ẩn trên mobile nếu không bật showFilters */}
         <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
-          <div className="border-b pb-4 mb-4">
+          <div className="border-b pb-3 sm:pb-4 mb-3 sm:mb-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-bold">Lọc</h3>
-              <button onClick={resetFilters} className="text-purple-600 text-sm">
+              <h3 className="font-bold text-sm sm:text-base">Lọc</h3>
+              <button onClick={resetFilters} className="text-purple-600 text-xs sm:text-sm">
                 Đặt lại
               </button>
             </div>
           </div>
 
-          {/* Bộ lọc thời gian khởi hành */}
-          <div className="mb-6">
-            <h4 className="font-semibold">Thời gian khởi hành</h4>
-            <ul className="mt-2 space-y-2">
+          <div className="mb-4 sm:mb-6">
+            <h4 className="font-semibold text-sm sm:text-base mb-2">Thời gian khởi hành</h4>
+            <ul className="space-y-1 sm:space-y-2">
               <li className="flex items-center">
                 <input
                   type="checkbox"
                   id="time-all"
                   checked={filters.time.all}
                   onChange={() => handleFilterChange('time', 'all')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="time-all">Tất cả</label>
+                <label htmlFor="time-all" className="text-sm">Tất cả</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -128,9 +125,9 @@ const FilterSidebar: React.FC<{
                   id="time-morning"
                   checked={filters.time.morning}
                   onChange={() => handleFilterChange('time', 'morning')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="time-morning">Sáng (từ 00:00 AM - 11:59 AM)</label>
+                <label htmlFor="time-morning" className="text-sm">Sáng (từ 00:00 AM - 11:59 AM)</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -138,9 +135,9 @@ const FilterSidebar: React.FC<{
                   id="time-afternoon"
                   checked={filters.time.afternoon}
                   onChange={() => handleFilterChange('time', 'afternoon')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="time-afternoon">Chiều (từ 12:00 PM - 06:59 PM)</label>
+                <label htmlFor="time-afternoon" className="text-sm">Chiều (từ 12:00 PM - 06:59 PM)</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -148,26 +145,25 @@ const FilterSidebar: React.FC<{
                   id="time-evening"
                   checked={filters.time.evening}
                   onChange={() => handleFilterChange('time', 'evening')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="time-evening">Tối (từ 07:00 PM - 11:59 PM)</label>
+                <label htmlFor="time-evening" className="text-sm">Tối (từ 07:00 PM - 11:59 PM)</label>
               </li>
             </ul>
           </div>
 
-          {/* Bộ lọc nhà điều hành */}
-          <div className="mb-6">
-            <h4 className="font-semibold">Nhà Tàu (Công ty)</h4>
-            <ul className="mt-2 space-y-2">
+          <div className="mb-4 sm:mb-6">
+            <h4 className="font-semibold text-sm sm:text-base mb-2">Nhà Tàu (Công ty)</h4>
+            <ul className="space-y-1 sm:space-y-2">
               <li className="flex items-center">
                 <input
                   type="checkbox"
                   id="operator-all"
                   checked={filters.operator.all}
                   onChange={() => handleFilterChange('operator', 'all')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="operator-all">Tất cả</label>
+                <label htmlFor="operator-all" className="text-sm">Tất cả</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -175,9 +171,9 @@ const FilterSidebar: React.FC<{
                   id="operator-livitrans"
                   checked={filters.operator.livitrans}
                   onChange={() => handleFilterChange('operator', 'livitrans')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="operator-livitrans">LIVITRANS</label>
+                <label htmlFor="operator-livitrans" className="text-sm">LIVITRANS</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -185,9 +181,9 @@ const FilterSidebar: React.FC<{
                   id="operator-newLivitrans"
                   checked={filters.operator.newLivitrans}
                   onChange={() => handleFilterChange('operator', 'newLivitrans')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="operator-newLivitrans">New Livitrans</label>
+                <label htmlFor="operator-newLivitrans" className="text-sm">New Livitrans</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -195,26 +191,25 @@ const FilterSidebar: React.FC<{
                   id="operator-lotusTrain"
                   checked={filters.operator.lotusTrain}
                   onChange={() => handleFilterChange('operator', 'lotusTrain')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="operator-lotusTrain">LOTUS TRAIN</label>
+                <label htmlFor="operator-lotusTrain" className="text-sm">LOTUS TRAIN</label>
               </li>
             </ul>
           </div>
 
-          {/* Bộ lọc tiện nghi */}
-          <div className="mb-6">
-            <h4 className="font-semibold">Tiện nghi</h4>
-            <ul className="mt-2 space-y-2">
+          <div className="mb-4 sm:mb-6">
+            <h4 className="font-semibold text-sm sm:text-base mb-2">Tiện nghi</h4>
+            <ul className="space-y-1 sm:space-y-2">
               <li className="flex items-center">
                 <input
                   type="checkbox"
                   id="amenity-food"
                   checked={filters.amenities.food}
                   onChange={() => handleFilterChange('amenities', 'food')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="amenity-food">Đồ ăn trên xe</label>
+                <label htmlFor="amenity-food" className="text-sm">Đồ ăn trên xe</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -222,9 +217,9 @@ const FilterSidebar: React.FC<{
                   id="amenity-chair"
                   checked={filters.amenities.chair}
                   onChange={() => handleFilterChange('amenities', 'chair')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="amenity-chair">Ghế Massage</label>
+                <label htmlFor="amenity-chair" className="text-sm">Ghế Massage</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -232,9 +227,9 @@ const FilterSidebar: React.FC<{
                   id="amenity-socketPlug"
                   checked={filters.amenities.socketPlug}
                   onChange={() => handleFilterChange('amenities', 'socketPlug')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="amenity-socketPlug">Ổ cắm</label>
+                <label htmlFor="amenity-socketPlug" className="text-sm">Ổ cắm</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -242,9 +237,9 @@ const FilterSidebar: React.FC<{
                   id="amenity-tv"
                   checked={filters.amenities.tv}
                   onChange={() => handleFilterChange('amenities', 'tv')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="amenity-tv">Ti Vi</label>
+                <label htmlFor="amenity-tv" className="text-sm">Ti Vi</label>
               </li>
               <li className="flex items-center">
                 <input
@@ -252,16 +247,18 @@ const FilterSidebar: React.FC<{
                   id="amenity-wifi"
                   checked={filters.amenities.wifi}
                   onChange={() => handleFilterChange('amenities', 'wifi')}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <label htmlFor="amenity-wifi">WiFi</label>
+                <label htmlFor="amenity-wifi" className="text-sm">WiFi</label>
               </li>
             </ul>
           </div>
 
-          {/* Nút reset bộ lọc */}
           <div className="text-center">
-            <button onClick={resetFilters} className="bg-purple-600 text-white px-4 py-2 rounded">
+            <button 
+              onClick={resetFilters} 
+              className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded text-sm sm:text-base w-full sm:w-auto"
+            >
               Đặt lại bộ lọc
             </button>
           </div>
@@ -278,36 +275,36 @@ const TripCard: React.FC<{
   onSelectTrip: (trip: Trip) => void; // Hàm xử lý khi chọn chuyến (mở popup chọn ghế)
 }> = ({ trip, openTripDetails, onSelectTrip }) => (
   <div className="border rounded-lg overflow-hidden">
-    <div className="grid grid-cols-12 gap-4 p-4">
+    <div className="grid grid-cols-12 gap-2 sm:gap-4 p-3 sm:p-4">
       {/* Cột 1: Giờ khởi hành, thời gian di chuyển, giờ đến */}
       <div className="col-span-12 md:col-span-2">
-        <div className="font-bold text-lg">{trip.departureTime}</div>
-        <div className="text-sm text-gray-500">{trip.duration}</div>
-        <div className="md:hidden text-sm mt-1">• {trip.bedsAvailable} Giường</div>
-        <div className="text-sm text-gray-500">Arrival Time: {trip.arrivalTime}</div>
+        <div className="font-bold text-base sm:text-lg">{trip.departureTime}</div>
+        <div className="text-xs sm:text-sm text-gray-500">{trip.duration}</div>
+        <div className="md:hidden text-xs sm:text-sm mt-1">• {trip.bedsAvailable} Giường</div>
+        <div className="text-xs sm:text-sm text-gray-500">Arrival Time: {trip.arrivalTime}</div>
       </div>
       {/* Cột 2: Tuyến đường (ga đi → ga đến) */}
       <div className="col-span-12 md:col-span-5">
-        <div className="grid grid-cols-12 gap-2">
+        <div className="grid grid-cols-12 gap-1 sm:gap-2">
           <div className="col-span-5">
-            <div className="font-medium">{trip.fromStation}</div>
-            <div className="text-sm text-gray-500">({trip.fromCity})</div>
+            <div className="font-medium text-sm sm:text-base">{trip.fromStation}</div>
+            <div className="text-xs sm:text-sm text-gray-500">({trip.fromCity})</div>
           </div>
           <div className="col-span-2 flex items-center justify-center">
             <CFaAngleRight />
           </div>
           <div className="col-span-5">
-            <div className="font-medium">{trip.toStation}</div>
-            <div className="text-sm text-gray-500">({trip.toCity})</div>
+            <div className="font-medium text-sm sm:text-base">{trip.toStation}</div>
+            <div className="text-xs sm:text-sm text-gray-500">({trip.toCity})</div>
           </div>
         </div>
       </div>
       {/* Cột 3: Số giường còn trống (ẩn trên mobile) */}
-      <div className="hidden md:col-span-1 md:flex items-center">{trip.bedsAvailable} Giường</div>
+      <div className="hidden md:col-span-1 md:flex items-center text-sm">{trip.bedsAvailable} Giường</div>
       {/* Cột 4: Giá vé */}
-      <div className="col-span-12 md:col-span-2 flex flex-col md:flex-row md:items-center md:justify-end gap-2">
+      <div className="col-span-12 md:col-span-2 flex flex-col md:flex-row md:items-center md:justify-end gap-1 sm:gap-2">
         <div className="flex items-center gap-1">
-          <span className="font-medium">VND {trip.adultPrice}</span>
+          <span className="font-medium text-sm sm:text-base">VND {trip.adultPrice}</span>
           <CFaAngleDown />
         </div>
       </div>
@@ -315,13 +312,13 @@ const TripCard: React.FC<{
       <div className="col-span-12 md:col-span-2 flex justify-end">
         <button
           onClick={() => onSelectTrip(trip)} // Mở popup chọn ghế
-          className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+          className="w-full md:w-auto bg-orange-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-orange-600 text-sm sm:text-base"
         >
           Chọn
         </button>
       </div>
     </div>
-    <div className="bg-gray-50 p-4 grid grid-cols-12 gap-4">
+    <div className="bg-gray-50 p-3 sm:p-4 grid grid-cols-12 gap-2 sm:gap-4">
       {/* Logo nhà điều hành */}
       <div className="col-span-12 md:col-span-2 flex items-center">
         <img
@@ -329,12 +326,12 @@ const TripCard: React.FC<{
             trip.operator === 'LIVITRANS' ? 'result-logo-livitrans.png' : 'cid-3382-lotus-train.png'
           }`}
           alt={trip.operator}
-          className="h-12"
+          className="h-8 sm:h-12"
         />
       </div>
       {/* Thông tin nhà điều hành, tên tàu, tên toa */}
       <div className="col-span-12 md:col-span-7">
-        <div className="font-medium">
+        <div className="font-medium text-sm sm:text-base">
           {trip.operator} • Train {trip.trainName} • Coach {trip.coachName}
         </div>
         {/* Hiển thị tiện nghi */}
@@ -342,7 +339,7 @@ const TripCard: React.FC<{
           {trip.amenities.wifi && (
             <div className="relative group">
               <span className="text-blue-500">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
@@ -358,7 +355,7 @@ const TripCard: React.FC<{
           {trip.amenities.powerPlug && (
             <div className="relative group">
               <span className="text-green-500">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l-7-10a1 1 0 011.12-.38z"
@@ -374,7 +371,7 @@ const TripCard: React.FC<{
           {trip.amenities.food && (
             <div className="relative group">
               <span className="text-red-500">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M18 6a4 4 0 00-4-4h-3a4 4 0 00-4 4v11a1 1 0 102 0V6a2 2 0 012-2h3a2 2 0 012 2v11a1 1 0 102 0V6z" />
                   <path d="M5 5a1 1 0 100-2H4a1 1 0 000 2h1zM3 11a1 1 0 100-2H2a1 1 0 000 2h1zM5 15a1 1 0 100-2H4a1 1 0 000 2h1z" />
                 </svg>
@@ -388,7 +385,7 @@ const TripCard: React.FC<{
       </div>
       {/* Nút xem chi tiết chuyến */}
       <div className="col-span-12 md:col-span-3 flex justify-end items-center">
-        <button onClick={() => openTripDetails(trip)} className="text-purple-600 text-sm">
+        <button onClick={() => openTripDetails(trip)} className="text-purple-600 text-xs sm:text-sm">
           Hình ảnh | Chi tiết
         </button>
       </div>
@@ -403,20 +400,19 @@ const TripDetailsModal: React.FC<{
   setActiveTab: React.Dispatch<React.SetStateAction<'details' | 'operator'>>; // Hàm cập nhật tab
   closeModal: () => void; // Hàm đóng modal
 }> = ({ selectedTrip, activeTab, setActiveTab, closeModal }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
     <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-      <div className="p-6">
-        <div className="flex justify-between items-center border-b pb-4 mb-4">
-          <h3 className="text-xl font-bold">Chi tiết</h3>
+      <div className="p-3 sm:p-6">
+        <div className="flex justify-between items-center border-b pb-3 sm:pb-4 mb-3 sm:mb-4">
+          <h3 className="text-lg sm:text-xl font-bold">Chi tiết</h3>
           <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
             <CFaTimes />
           </button>
         </div>
-        {/* Tabs: Trip Details và Operator Info */}
-        <div className="mb-4 border-b">
-          <div className="flex space-x-4">
+        <div className="mb-3 sm:mb-4 border-b">
+          <div className="flex space-x-3 sm:space-x-4">
             <button
-              className={`pb-2 px-1 ${
+              className={`pb-2 px-1 text-sm sm:text-base ${
                 activeTab === 'details' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('details')}
@@ -424,7 +420,7 @@ const TripDetailsModal: React.FC<{
               Trip Details
             </button>
             <button
-              className={`pb-2 px-1 ${
+              className={`pb-2 px-1 text-sm sm:text-base ${
                 activeTab === 'operator' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('operator')}
@@ -433,14 +429,13 @@ const TripDetailsModal: React.FC<{
             </button>
           </div>
         </div>
-        {/* Tab Trip Details */}
         {activeTab === 'details' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <div className="bg-green-50 p-3 mb-4">
-                <h4 className="font-bold">Thông tin khởi hành</h4>
+              <div className="bg-green-50 p-2 sm:p-3 mb-3 sm:mb-4">
+                <h4 className="font-bold text-sm sm:text-base">Thông tin khởi hành</h4>
               </div>
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <tbody>
                   <tr className="border-b">
                     <td className="py-2 font-medium w-1/3">Ngày</td>
@@ -462,10 +457,10 @@ const TripDetailsModal: React.FC<{
               </table>
             </div>
             <div>
-              <div className="bg-green-50 p-3 mb-4">
-                <h4 className="font-bold">Thông tin điểm đến</h4>
+              <div className="bg-green-50 p-2 sm:p-3 mb-3 sm:mb-4">
+                <h4 className="font-bold text-sm sm:text-base">Thông tin điểm đến</h4>
               </div>
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <tbody>
                   <tr className="border-b">
                     <td className="py-2 font-medium w-1/3">Ngày</td>
@@ -487,10 +482,10 @@ const TripDetailsModal: React.FC<{
               </table>
             </div>
             <div>
-              <div className="bg-green-50 p-3 mb-4">
-                <h4 className="font-bold">Thông tin loại xe và giá vé</h4>
+              <div className="bg-green-50 p-2 sm:p-3 mb-3 sm:mb-4">
+                <h4 className="font-bold text-sm sm:text-base">Thông tin loại xe và giá vé</h4>
               </div>
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <tbody>
                   <tr className="border-b">
                     <td className="py-2 font-medium w-1/3">Mã tàu</td>
@@ -511,27 +506,28 @@ const TripDetailsModal: React.FC<{
                 </tbody>
               </table>
             </div>
-            {/* Bản đồ (nếu có tọa độ) */}
             {selectedTrip.fromLatitude && selectedTrip.fromLongitude && (
               <div>
-                <div className="bg-green-50 p-3 mb-4">
-                  <h4 className="font-bold">Depart Location Map</h4>
+                <div className="bg-green-50 p-2 sm:p-3 mb-3 sm:mb-4">
+                  <h4 className="font-bold text-sm sm:text-base">Depart Location Map</h4>
                 </div>
-                <div className="h-48 bg-gray-200 rounded flex items-center justify-center">
-                  <span className="text-gray-500">Map would be displayed here</span>
+                <div className="h-32 sm:h-48 bg-gray-200 rounded flex items-center justify-center">
+                  <span className="text-gray-500 text-xs sm:text-sm">Map would be displayed here</span>
                 </div>
               </div>
             )}
           </div>
         )}
-        {/* Tab Operator Info */}
         {activeTab === 'operator' && (
-          <div className="mt-4">
-            <h1 className="text-xl font-bold">{selectedTrip.operator}</h1>
+          <div className="mt-3 sm:mt-4">
+            <h1 className="text-lg sm:text-xl font-bold">{selectedTrip.operator}</h1>
           </div>
         )}
-        <div className="mt-6 flex justify-end">
-          <button onClick={closeModal} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+        <div className="mt-4 sm:mt-6 flex justify-end">
+          <button 
+            onClick={closeModal} 
+            className="bg-gray-200 text-gray-800 px-3 sm:px-4 py-2 rounded hover:bg-gray-300 text-sm sm:text-base"
+          >
             Đóng
           </button>
         </div>
@@ -1007,8 +1003,8 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row gap-6">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-7xl">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         <FilterSidebar
           filters={filters}
           setFilters={setFilters}
@@ -1016,15 +1012,15 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
           setShowFilters={setShowFilters}
           resetFilters={resetFilters}
         />
-        <div className="w-full md:w-3/4">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">
+        <div className="w-full lg:w-3/4">
+          <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
+                <span className="font-semibold truncate max-w-[120px] sm:max-w-none">
                   {tripDirection === 'outbound' ? fromLabel : returnFromLabel}
                 </span>
-                <CFaLongArrowAltRight />
-                <span className="font-semibold">
+                <CFaLongArrowAltRight className="flex-shrink-0" />
+                <span className="font-semibold truncate max-w-[120px] sm:max-w-none">
                   {tripDirection === 'outbound' ? toLabel : returnToLabel}
                 </span>
               </div>
@@ -1032,7 +1028,7 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
                 <CFaEdit />
               </button>
             </div>
-            <div className="hidden md:grid grid-cols-12 gap-4 mb-4 text-sm border-b pb-2">
+            <div className="hidden md:grid grid-cols-12 gap-2 sm:gap-4 mb-4 text-sm border-b pb-2">
               <div className="col-span-2 font-semibold flex items-center gap-1">
                 <span>Giờ khởi hành</span>
                 <CFaCaretDown />
@@ -1051,7 +1047,7 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
               </div>
               <div className="col-span-2"></div>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {filteredTrips.length > 0 ? (
                 filteredTrips.map((trip: Trip) => (
                   <TripCard
@@ -1080,91 +1076,87 @@ const TrainSearchResults: React.FC<TrainSearchResultsProps> = ({
       </div>
 
       {showSeatSelectionPopup && selectedTripForSeats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <HeaderSelection
-            departure={selectedTripForSeats.fromStation}
-            arrival={selectedTripForSeats.toStation}
-            date={selectedTripForSeats.departureDate.split('-').reverse().join('/')}
-            trainName={selectedTripForSeats.trainName || selectedTripForSeats.coachName}
-            coach={generateSeatTypes(selectedTripForSeats)}
-            onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
-            onClose={closeSeatSelectionPopup}
-            onContinue={(state) => {
-              if (tripDirection === 'outbound') {
-                // Khởi tạo hoặc cập nhật selectedOutboundTrip với ghế đã chọn
-                if (state?.selectedSeats && selectedTripForSeats) {
-                  const newOutboundTrip = {
-                    operator: selectedTripForSeats.operator,
-                    departureTime: selectedTripForSeats.departureTime,
-                    seats: state.selectedSeats,
-                    departure: selectedTripForSeats.fromStation,
-                    arrival: selectedTripForSeats.toStation,
-                    date: selectedTripForSeats.departureDate,
-                    trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-                    coach: selectedTripForSeats.coachName || "",
-                    pricePerSeat: selectedTripForSeats.adultPrice
-                  };
-                  
-                  setSelectedOutboundTrip(newOutboundTrip);
-                  
-                  // Chuyển sang tab chuyến về
-                  setTripDirection('return');
-                  closeSeatSelectionPopup();
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-lg">
+            <HeaderSelection
+              departure={selectedTripForSeats.fromStation}
+              arrival={selectedTripForSeats.toStation}
+              date={selectedTripForSeats.departureDate.split('-').reverse().join('/')}
+              trainName={selectedTripForSeats.trainName || selectedTripForSeats.coachName}
+              coach={generateSeatTypes(selectedTripForSeats)}
+              onCoachClick={(coach: string) => console.log(`Đã chọn toa: ${coach}`)}
+              onClose={closeSeatSelectionPopup}
+              onContinue={(state) => {
+                if (tripDirection === 'outbound') {
+                  if (state?.selectedSeats && selectedTripForSeats) {
+                    const newOutboundTrip = {
+                      operator: selectedTripForSeats.operator,
+                      departureTime: selectedTripForSeats.departureTime,
+                      seats: state.selectedSeats,
+                      departure: selectedTripForSeats.fromStation,
+                      arrival: selectedTripForSeats.toStation,
+                      date: selectedTripForSeats.departureDate,
+                      trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
+                      coach: selectedTripForSeats.coachName || "",
+                      pricePerSeat: selectedTripForSeats.adultPrice
+                    };
+                    
+                    setSelectedOutboundTrip(newOutboundTrip);
+                    setTripDirection('return');
+                    closeSeatSelectionPopup();
+                  }
+                } else {
+                  if (state?.selectedSeats && selectedTripForSeats) {
+                    const newReturnTrip = {
+                      operator: selectedTripForSeats.operator,
+                      departureTime: selectedTripForSeats.departureTime,
+                      seats: state.selectedSeats,
+                      departure: selectedTripForSeats.fromStation,
+                      arrival: selectedTripForSeats.toStation,
+                      date: selectedTripForSeats.departureDate,
+                      trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
+                      coach: selectedTripForSeats.coachName || "",
+                      pricePerSeat: selectedTripForSeats.adultPrice
+                    };
+                    
+                    setSelectedReturnTrip(newReturnTrip);
+                    navigate('/payment', {
+                      state: {
+                        outboundTrip: selectedOutboundTrip,
+                        returnTrip: newReturnTrip
+                      }
+                    });
+                  }
                 }
-              } else {
-                // Xử lý chuyến về
-                if (state?.selectedSeats && selectedTripForSeats) {
-                  const newReturnTrip = {
-                    operator: selectedTripForSeats.operator,
-                    departureTime: selectedTripForSeats.departureTime,
-                    seats: state.selectedSeats,
-                    departure: selectedTripForSeats.fromStation,
-                    arrival: selectedTripForSeats.toStation,
-                    date: selectedTripForSeats.departureDate,
-                    trainName: selectedTripForSeats.trainName || selectedTripForSeats.coachName,
-                    coach: selectedTripForSeats.coachName || "",
-                    pricePerSeat: selectedTripForSeats.adultPrice
-                  };
-                  
-                  setSelectedReturnTrip(newReturnTrip);
-                  
-                  // Chuyển đến trang thanh toán
-                  navigate('/payment', {
-                    state: {
-                      outboundTrip: selectedOutboundTrip,
-                      returnTrip: newReturnTrip
-                    }
-                  });
-                }
-              }
-            }}
-            tripDirection={tripDirection}
-            roundTrip={roundTrip}
-            selectedOutboundTrip={selectedOutboundTrip ? {
-              operator: selectedOutboundTrip.operator,
-              departureTime: selectedOutboundTrip.departureTime,
-              seats: selectedOutboundTrip.seats || [],
-              departure: selectedOutboundTrip.departure,
-              arrival: selectedOutboundTrip.arrival,
-              date: selectedOutboundTrip.date,
-              trainName: selectedOutboundTrip.trainName,
-              coach: selectedOutboundTrip.coach,
-              pricePerSeat: parsePrice(selectedOutboundTrip.pricePerSeat)
-            } : null}
-            selectedReturnTrip={selectedReturnTrip ? {
-              operator: selectedReturnTrip.operator,
-              departureTime: selectedReturnTrip.departureTime,
-              seats: selectedReturnTrip.seats || [],
-              departure: selectedReturnTrip.departure,
-              arrival: selectedReturnTrip.arrival,
-              date: selectedReturnTrip.date,
-              trainName: selectedReturnTrip.trainName,
-              coach: selectedReturnTrip.coach,
-              pricePerSeat: parsePrice(selectedReturnTrip.pricePerSeat)
-            } : null}
-            setSelectedOutboundTrip={setSelectedOutboundTrip}
-            setSelectedReturnTrip={setSelectedReturnTrip}
-          />
+              }}
+              tripDirection={tripDirection}
+              roundTrip={roundTrip}
+              selectedOutboundTrip={selectedOutboundTrip ? {
+                operator: selectedOutboundTrip.operator,
+                departureTime: selectedOutboundTrip.departureTime,
+                seats: selectedOutboundTrip.seats || [],
+                departure: selectedOutboundTrip.departure,
+                arrival: selectedOutboundTrip.arrival,
+                date: selectedOutboundTrip.date,
+                trainName: selectedOutboundTrip.trainName,
+                coach: selectedOutboundTrip.coach,
+                pricePerSeat: parsePrice(selectedOutboundTrip.pricePerSeat)
+              } : null}
+              selectedReturnTrip={selectedReturnTrip ? {
+                operator: selectedReturnTrip.operator,
+                departureTime: selectedReturnTrip.departureTime,
+                seats: selectedReturnTrip.seats || [],
+                departure: selectedReturnTrip.departure,
+                arrival: selectedReturnTrip.arrival,
+                date: selectedReturnTrip.date,
+                trainName: selectedReturnTrip.trainName,
+                coach: selectedReturnTrip.coach,
+                pricePerSeat: parsePrice(selectedReturnTrip.pricePerSeat)
+              } : null}
+              setSelectedOutboundTrip={setSelectedOutboundTrip}
+              setSelectedReturnTrip={setSelectedReturnTrip}
+            />
+          </div>
         </div>
       )}
     </div>
