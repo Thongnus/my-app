@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import HeaderSelectionPopup from "./HeaderSeat";
-import SeatSelection from "./SeatSelection";
 import { HeaderSelectionProps, Seat } from "../../Entity/Entity";
+import SeatSelection from "./SeatSelection";
 
 const generateSeatData = (coach: string, type: string, availability: number): Seat[] => {
   const totalSeats = 64;

@@ -162,7 +162,9 @@ const App: React.FC = () => {
   const seatData = generateSeatData(selectedCoach.coach, selectedCoach.type, selectedCoach.availability);
 
   return (
+    
     <div className="min-h-screen bg-gray-100">
+      <Header/>
       <Routes>
         <Route path="/" element={<HeroSection />} />
         <Route path="/login" element={<LoginForm />} />
@@ -205,6 +207,7 @@ const App: React.FC = () => {
         />
         <Route path="/payment" element={<PaymentPage />} />
       </Routes>
+      <Footer/>
     </div>
   );
 };

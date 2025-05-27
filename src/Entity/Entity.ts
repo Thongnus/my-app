@@ -188,7 +188,14 @@ export interface TrainRoute {
     lotusTrain: boolean; // Lọc nhà điều hành LOTUS TRAIN
     all: boolean; // Chọn tất cả nhà điều hành
   };
-  
+  export  type NewFeed = {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+  buttonText: string;
+};
+
   // Định nghĩa kiểu dữ liệu cho tất cả bộ lọc
   export type FilterTypes = {
     time: TimeFilter; // Bộ lọc thời gian

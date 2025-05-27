@@ -19,9 +19,6 @@ import TrainBookingForm from '../Components/TrainBookingForm';
 const IconTrain = FaTrain as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconBus = FaBus as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 const IconShip = FaShip as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const IconSwap = FaExchangeAlt as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const IconCalendar = FaCalendarAlt as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const IconPassenger = FaUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 
 const HeroSection = () => {
   const [activeTab, setActiveTab] = useState('train');
