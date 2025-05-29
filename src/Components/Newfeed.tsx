@@ -1,63 +1,59 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation,Autoplay} from 'swiper/modules';
-// Import Swiper styles
+import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import fetchPromotions from '../Service/NewFeedService';
+import { NewfeedDto } from '../Entity/Entity';
 
-const promotions = [
-  {
-    image: "/images/da-nang.jpg",
-    title: "Vì vu Đà Nẵng - Không vui không về",
-    description: "Khám phá thành phố đáng sống nhất Việt Nam: Bãi biển Mỹ Khê | Cầu Rồng | Bà Nà Hills",
-    buttonText: "Đặt Ngay",
-  },
-  {
-    image: "/images/vietnam-explore.jpg",
-    title: "Du lịch miền Trung cùng Vietnam Explore Travel",
-    description: "150K VND - Đà Nẵng → Huế, Hội An,... Giá chỉ từ *T&C Apply",
-    buttonText: "Đặt vé ngay",
-  },
-  {
-    image: "/images/ho-chi-minh-con-dao.jpg",
-    title: "Sài Gòn - Côn Đảo: Trải nghiệm mới cùng siêu tàu Thăng Long",
-    description: "Giá vé chỉ từ 615K/người. Bắt đầu từ 13/5/2024 *T&C Apply",
-    buttonText: "BOOK NOW",
-  },
-  {
-    image: "/images/ho-chi-minh-con-dao.jpg",
-    title: "Sài Gòn - Côn Đảo: Trải nghiệm mới cùng siêu tàu Thăng Long",
-    description: "Giá vé chỉ từ 615K/người. Bắt đầu từ 13/5/2024 *T&C Apply",
-    buttonText: "BOOK NOW",
-  },
-  {
-    image: "/images/ho-chi-minh-con-dao.jpg",
-    title: "Sài Gòn - Côn Đảo: Trải nghiệm mới cùng siêu tàu Thăng Long",
-    description: "Giá vé chỉ từ 615K/người. Bắt đầu từ 13/5/2024 *T&C Apply",
-    buttonText: "BOOK NOW",
-  },
-  {
-    image: "/images/ho-chi-minh-con-dao.jpg",
-    title: "Sài Gòn - Côn Đảo: Trải nghiệm mới cùng siêu tàu Thăng Long",
-    description: "Giá vé chỉ từ 615K/người. Bắt đầu từ 13/5/2024 *T&C Apply",
-    buttonText: "BOOK NOW",
-  },
-];
+// Tùy chọn: Import file CSS nếu tạo riêng
+// import './Newfeed.css';
 
-const Newfeed = () => {
+const Newfeed: React.FC = () => {
+  const [promotions, setPromotions] = useState<NewfeedDto[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPromotions = async () => {
+      try {
+        const data = await fetchPromotions();
+        setPromotions(data);
+        setLoading(false);
+      } catch (err: any) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    loadPromotions();
+  }, []);
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8 text-center text-gray-600">Đang tải...</div>;
+  }
+
+  if (error) {
+    return <div className="container mx-auto px-4 py-8 text-center text-red-500">{error}</div>;
+  }
+
+  if (promotions.length === 0) {
+    return <div className="container mx-auto px-4 py-8 text-center text-gray-600">Không có khuyến mãi nào.</div>;
+  }
+
   return (
-    <div className=" container mx-auto px-4 py-6">
-      <h2 className="text-xl font-semibold mb-2">Transport Operators' Offers & News</h2>
-      <p className="text-sm text-gray-500 mb-6">Don't miss out on these incredible deals - book now before they're gone!</p>
+    <div className="container mx-auto px-4 py-12">
+      <h2 className="text-3xl font-bold mb-4 text-gray-800">Transport Operators' Offers & News</h2>
+      <p className="text-lg text-gray-600 mb-8">Don't miss out on these incredible deals - book now before they're gone!</p>
       
       <Swiper
-       autoplay={{
-        delay: 2000, // Delay 2 giây
-        disableOnInteraction: false, // Tiếp tục autoplay sau khi người dùng tương tác
-      }}
-        modules={[Navigation]}
+        autoplay={{
+          delay: 2000,
+          disableOnInteraction: false,
+        }}
+        modules={[Navigation, Autoplay]}
         navigation
-        spaceBetween={40}
+        spaceBetween={30}
         slidesPerView={1}
         breakpoints={{
           640: {
@@ -69,24 +65,23 @@ const Newfeed = () => {
         }}
         loop={true}
       >
-        {promotions.map((promo, index) => (
-    <SwiperSlide key={index} className="h-full">
-    <div className="bg-yellow-300 rounded-lg shadow-md p-4 flex flex-col justify-between h-full min-h-[400px]">
-      <img
-        src={promo.image}
-        alt={promo.title}
-        className="w-full h-40 object-cover rounded"
-      />
-      <div className="mt-4 flex flex-col flex-1">
-        <h3 className="text-lg font-bold mb-2">{promo.title}</h3>
-        <p className="text-sm text-gray-700 mb-4 flex-1">{promo.description}</p>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mt-auto">
-          {promo.buttonText}
-        </button>
-      </div>
-    </div>
-  </SwiperSlide>
-  
+        {promotions.map((promo) => (
+          <SwiperSlide key={promo.id} className="h-full">
+            <div className="bg-white rounded-xl shadow-lg p-5 flex flex-col justify-between h-full min-h-[350px] transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <img
+                src={promo.image}
+                alt={promo.title}
+                className="w-full h-48 object-cover rounded-lg"
+                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                  e.currentTarget.src = '/images/default.jpg';
+                }}
+              />
+              <div className="mt-4 flex flex-col flex-1">
+                <h3 className="text-xl font-semibold mb-2 text-blue-600">{promo.title}</h3>
+                <p className="text-base text-gray-600 flex-1">{promo.description}</p>
+              </div>
+            </div>
+          </SwiperSlide>
         ))}
       </Swiper>
     </div>
