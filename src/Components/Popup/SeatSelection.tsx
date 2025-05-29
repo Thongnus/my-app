@@ -1,34 +1,12 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SeatSelectionProps, Coach, Trip } from "../../Entity/Entity";
-import { parsePrice, formatPrice } from '../../utils/priceUtils';
-import { log } from "console";
-
-interface TripData {
-  operator: string;
-  departureTime: string;
-  seats?: string[];
-  departure?: string;
-  arrival?: string;
-  date?: string;
-  trainName?: string;
-  coach?: Coach;
-  pricePerSeat: number;
-  totalPrice?: number;
-  total: number;
-  coachType?: string;
-}
-
-interface NavigationState {
-  outboundTrip: TripData;
-  returnTrip?: TripData;
-}
+import { SeatSelectionProps } from "../../Entity/Entity";
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({
   coach,
   seats,
   onSeatClick,
-  totalAvailableSeats,
+  totalAvailableSeats = 0,
   onContinue,
   onBook,
   departure,
@@ -40,142 +18,68 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   selectedOutboundTrip,
   selectedReturnTrip,
 }) => {
-  const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const navigate = useNavigate();
 
-  const outboundTripData: TripData = {
-    operator: selectedOutboundTrip?.operator || '',
-    departureTime: selectedOutboundTrip?.departureTime || '',
-    seats: selectedOutboundTrip?.seats || [],
-    departure: departure || '',
-    arrival: arrival || '',
-    date: date || '',
-    trainName: trainName || '',
-    coach: coach,
-    pricePerSeat: selectedOutboundTrip?.pricePerSeat || 0,
-    totalPrice: selectedOutboundTrip?.seats?.reduce((total, seatNumber) => {
-      const seat = seats.find(s => s.seatNumber === seatNumber);
-      return total + (seat?.price || 0);
-    }, 0) || 0,
-    total: selectedOutboundTrip?.seats?.reduce((total, seatNumber) => {
-      const seat = seats.find(s => s.seatNumber === seatNumber);
-      return total + (seat?.price || 0);
-    }, 0) || 0,
-    coachType: coach.type
-  };
-
-  const returnTripData: TripData = roundTrip && selectedReturnTrip ? {
-    operator: selectedReturnTrip.operator,
-    departureTime: selectedReturnTrip.departureTime,
-    seats: selectedReturnTrip.seats || [],
-    departure: departure || '',
-    arrival: arrival || '',
-    date: date || '',
-    trainName: trainName || '',
-    coach: coach,
-    pricePerSeat: selectedReturnTrip.pricePerSeat || 0,
-    totalPrice: selectedReturnTrip.seats?.reduce((total, seatNumber) => {
-      const seat = seats.find(s => s.seatNumber === seatNumber);
-      return total + (seat?.price || 0);
-    }, 0) || 0,
-    total: selectedReturnTrip.seats?.reduce((total, seatNumber) => {
-      const seat = seats.find(s => s.seatNumber === seatNumber);
-      return total + (seat?.price || 0);
-    }, 0) || 0,
-    coachType: coach.type
-  } : outboundTripData;
-
-  // Hàm xử lý khi click vào ghế
   const handleSeatClick = (seatNumber: string) => {
     if (selectedSeats.includes(seatNumber)) {
-      // Nếu ghế đã được chọn, bỏ chọn
       setSelectedSeats(selectedSeats.filter((seat) => seat !== seatNumber));
     } else {
-      // Nếu ghế chưa được chọn, thêm vào danh sách
       setSelectedSeats([...selectedSeats, seatNumber]);
     }
     onSeatClick?.(seatNumber);
   };
 
-
-  // Hàm xử lý khi click nút đặt vé/tiếp tục
-  const handleContinue = () => {
-    console.log('Selected Seats:', selectedSeats);
-    console.log('Trip Direction:', tripDirection);
-    console.log('Round Trip:', roundTrip);
-    
+  const handleButtonClick = () => {
     if (selectedSeats.length === 0) {
-      alert("Vui lòng chọn ghế trước khi tiếp tục!");
+      alert("Vui lòng chọn ít nhất một ghế trước khi tiếp tục!");
       return;
     }
 
-    // Tính tổng giá vé dựa trên các ghế đã chọn
-    const totalPrice = selectedSeats.reduce((total, seatNumber) => {
-      const seat = seats.find(s => s.seatNumber === seatNumber);
-      return total + (seat?.price || 0);
-    }, 0);
+    onBook?.(selectedSeats);
 
-    const navigationState: NavigationState = {
-      outboundTrip: {
-        operator: selectedOutboundTrip?.operator || '',
-        departureTime: selectedOutboundTrip?.departureTime || '',
-        seats: selectedSeats,
-        departure: departure || '',
-        arrival: arrival || '',
-        date: date || '',
-        trainName: trainName || '',
-        coach: coach,
-        coachType: coach.type,
-        pricePerSeat: selectedOutboundTrip?.pricePerSeat || 0,
-        totalPrice: totalPrice,
-        total: totalPrice
-      }
-    };
-
-    // Nếu là chuyến khứ hồi và đang ở chuyến đi
-    if (roundTrip && tripDirection === 'outbound') {
-      // Cập nhật state và chuyển sang tab chuyến về
-      onContinue?.({
-        tripDirection: 'return',
-        roundTrip: true,
-        selectedSeats: selectedSeats
+    if (roundTrip && tripDirection === "outbound") {
+      onContinue?.();
+    } else {
+      console.log("Thông tin đặt vé:", {
+        departure,
+        arrival,
+        date,
+        trainName,
+        coach,
+        selectedSeats,
+        tripDirection,
       });
-      return;
-    }
 
-    // Nếu là chuyến khứ hồi và đang ở chuyến về
-    if (roundTrip && tripDirection === 'return') {
-      // Kiểm tra xem đã có thông tin chuyến đi chưa
-      if (!selectedOutboundTrip || !selectedOutboundTrip.seats || selectedOutboundTrip.seats.length === 0) {
-        alert("Vui lòng chọn ghế cho chuyến đi trước!");
-        return;
-      }
-
-      navigationState.returnTrip = {
-        operator: selectedReturnTrip?.operator || '',
-        departureTime: selectedReturnTrip?.departureTime || '',
+      // Đảm bảo dữ liệu đầy đủ trong selectedOutboundTrip và selectedReturnTrip
+      const outboundTripData = selectedOutboundTrip || {
+        operator: "",
+        departureTime: "",
         seats: selectedSeats,
-        departure: departure || '',
-        arrival: arrival || '',
-        date: date || '',
-        trainName: trainName || '',
-        coach: coach,
-        coachType: coach.type,
-        pricePerSeat: selectedReturnTrip?.pricePerSeat || 0,
-        totalPrice: totalPrice,
-        total: totalPrice
+        departure: departure || "",
+        arrival: arrival || "",
+        date: date?.split('/').reverse().join('-') || "",
+        trainName: trainName || "",
+        coach: coach || "",
+        pricePerSeat: 0,
       };
-    }
 
-    console.log('Navigation State:', navigationState);
-    navigate("/payment", { state: navigationState });
+      const returnTripData = selectedReturnTrip || null;
+
+      navigate("/payment", {
+        state: {
+          outboundTrip: outboundTripData,
+          returnTrip: roundTrip ? returnTripData : null,
+          outboundSeats: selectedSeats,
+          returnSeats: roundTrip && selectedReturnTrip ? selectedReturnTrip.seats : [],
+        },
+      });
+    }
   };
 
-  // Xác định có hiển thị nút đặt vé hay không
   const showBookButton = !roundTrip || (roundTrip && tripDirection === "return" && selectedOutboundTrip?.seats && selectedOutboundTrip.seats.length > 0);
 
-  // Lấy thông tin về loại toa
-  const coachNumber = parseInt(coach.coach.replace("Toa ", ""));
+  const coachNumber = parseInt(coach.replace("Toa ", ""));
   const isSeatCoach = coachNumber <= 2;
   const isBedCoach = coachNumber >= 3;
   const seatRows = 4;
@@ -183,12 +87,6 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   const seatCols = seatsPerSide * 2;
   const bedsPerCompartment = 6;
   const compartments = isBedCoach ? Math.ceil(seats.length / bedsPerCompartment) : 1;
-
-  // Cập nhật hiển thị giá
-  const displayPrice = formatPrice(selectedSeats.reduce((total, seatNumber) => {
-    const seat = seats.find(s => s.seatNumber === seatNumber);
-    return total + (seat?.price || 0);
-  }, 0));
 
   return (
     <div className="bg-gray-50 p-6 rounded-lg shadow-sm sm:p-4">
@@ -213,7 +111,6 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
       <div className="flex justify-center">
         <div className="w-full max-w-5xl">
           {isSeatCoach ? (
-            // Hiển thị sơ đồ ghế ngồi
             <div className="flex flex-col gap-3 sm:gap-2">
               {Array.from({ length: seatRows }).map((_, rowIdx) => {
                 const rowSeats = seats.slice(rowIdx * seatCols, (rowIdx + 1) * seatCols);
@@ -235,7 +132,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                             <span className="font-bold text-sm sm:text-xs text-gray-800">{seat.seatNumber}</span>
                             {seat.isAvailable && (
                               <span className="text-[10px] sm:text-[9px] text-gray-600">
-                                {`${(seat.price / 1000).toLocaleString()}K`}
+                                {`${Math.round(seat.isAvailable ? 582 : 906)}K`}
                               </span>
                             )}
                             <div
@@ -263,7 +160,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                             <span className="font-bold text-sm sm:text-xs text-gray-800">{seat.seatNumber}</span>
                             {seat.isAvailable && (
                               <span className="text-[10px] sm:text-[9px] text-gray-600">
-                                {`${(seat.price / 1000).toLocaleString()}K`}
+                                {`${Math.round(seat.isAvailable ? 582 : 906)}K`}
                               </span>
                             )}
                             <div
@@ -280,7 +177,6 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
               })}
             </div>
           ) : (
-            // Hiển thị sơ đồ giường nằm
             <div className="overflow-x-auto">
               <div className="flex flex-row gap-4 sm:gap-3">
                 {Array.from({ length: compartments }).map((_, compIdx) => (
@@ -302,11 +198,11 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                             >
                               <span className="font-bold text-sm sm:text-xs text-gray-800">{seat.seatNumber}</span>
                               <span className="text-[10px] sm:text-[9px] text-gray-600">
-                                T{seat.tier}
+                                T{seat.tier || tierIdx + 1}
                               </span>
                               {seat.isAvailable && (
                                 <span className="text-[10px] sm:text-[9px] text-gray-600">
-                                  {`${(seat.price / 1000).toLocaleString()}K`}
+                                  {`${Math.round(seat.isAvailable ? 582 : 906)}K`}
                                 </span>
                               )}
                               <div
@@ -336,11 +232,11 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                             >
                               <span className="font-bold text-sm sm:text-xs text-gray-800">{seat.seatNumber}</span>
                               <span className="text-[10px] sm:text-[9px] text-gray-600">
-                                T{seat.tier}
+                                T{seat.tier || tierIdx + 1}
                               </span>
                               {seat.isAvailable && (
                                 <span className="text-[10px] sm:text-[9px] text-gray-600">
-                                  {`${(seat.price / 1000).toLocaleString()}K`}
+                                  {`${Math.round(seat.isAvailable ? 582 : 906)}K`}
                                 </span>
                               )}
                               <div
@@ -360,9 +256,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
           )}
         </div>
       </div>
-      {/* Hiển thị chú thích và thông tin ghế đã chọn */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:space-y-0 space-y-3">
-        {/* Phần chú thích */}
         <div className="flex space-x-6 sm:space-x-4">
           <div className="flex items-center space-x-2 sm:space-x-1.5">
             <div className="w-5 h-5 sm:w-4 sm:h-4 bg-white border border-gray-300 rounded"></div>
@@ -377,50 +271,29 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
             <span className="text-sm sm:text-xs text-gray-700">Chỗ đang chọn</span>
           </div>
         </div>
-      </div>
-
-      {/* Phần thông tin ghế đã chọn */}
-      {selectedSeats.length > 0 && (
-        <div className="w-full mt-3">
-          <div className="bg-white p-2 rounded-lg shadow-sm">
-            <div className="flex items-center space-x-4 overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              {selectedSeats.map((seatNumber) => {
-                const seat = seats.find(s => s.seatNumber === seatNumber);
-                return (
-                  <div key={seatNumber} className="flex items-center space-x-2 text-sm">
-                    <div className="flex items-center">
-                      <span className="font-medium">Ghế {seatNumber}</span>
-                      {seat?.tier && <span className="ml-1 text-gray-600">(T{seat.tier})</span>}
-                    </div>
-                    <div className="text-orange-600 font-medium">
-                      {seat ? `${(seat.price / 1000).toLocaleString()}K` : ''}
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="border-l h-6 mx-2"></div>
-              <div className="flex items-center font-semibold text-sm">
-                <span>Tổng:</span>
-                <span className="text-orange-600 ml-2">
-                  {displayPrice}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="text-orange-600 text-sm sm:text-xs font-medium">
+          Đã chọn: {selectedSeats.length}/{totalAvailableSeats} chỗ
         </div>
-      )}
-
-      {/* Nút đặt vé */}
+      </div>
       <div className="flex justify-end mt-6">
         <button
-          onClick={handleContinue}
+          onClick={handleButtonClick}
           className="bg-orange-500 text-white px-6 py-2 sm:px-4 sm:py-1.5 rounded-lg flex items-center text-sm sm:text-xs hover:bg-orange-600 transition-colors cursor-pointer"
         >
-          {showBookButton ? 'Đặt vé' : 'Tiếp tục'}
+          {showBookButton ? "Đặt vé" : "Tiếp tục chọn chuyến về"}
+          {showBookButton ? (
+            <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 sm:w-3 sm:h-3 ml-2 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          )}
         </button>
       </div>
     </div>
   );
-}
+};
 
 export default SeatSelection;

@@ -14,6 +14,7 @@ import HeroSection from './pages/HomePage';
 import Layout from './pages/Layout';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
+import DetailNewFeed from "./Components/DetailNewFeed";
 
 const generateSeatData = (coach: string, type: string, availability: number): Seat[] => {
   const totalSeats = 64;
@@ -49,8 +50,8 @@ const App: React.FC = () => {
     returnDate: null,
     passengers: "1",
     roundTrip: false,
-    ticketCollector: {},
-    passenger: {},
+  
+
   });
 
   const [selectedOutboundTrip, setSelectedOutboundTrip] = useState<{
@@ -165,14 +166,15 @@ const App: React.FC = () => {
     
     <div className="min-h-screen bg-gray-100">
       <Header/>
+      
       <Routes>
         <Route path="/" element={<HeroSection />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/train-booking" element={<Layout />} />
         <Route path="/train-search-results" element={<LayoutSearch />} />
-        <Route
-          path="/header-selection"
+        <Route path="/detail-new-feed/:id" element={<DetailNewFeed />} />
+        <Route path="/header-selection"
           element={
             <HeaderSelectionPopup
               departure="Ga Hà Nội"

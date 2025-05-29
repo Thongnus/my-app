@@ -22,7 +22,48 @@ export interface NewfeedDto {
   image: string;
   createdAt: string;
   updatedAt: string;
+  content: string;
 }
+export interface TrainRoute {
+  tripId: number;
+  departure: string;
+  arrival: string;
+  duration: string;
+  trainNumber: string;
+  averagePrice?: number;
+}
+ // Định nghĩa kiểu dữ liệu cho các tham số tìm kiếm chuyến tàu
+export interface SearchParams {
+  departure: number;      // Đổi tên từ origin
+  destination: number;
+  departureDate: string;  // Đổi tên từ date
+  returnDate?: string;
+  passengers: number;
+}
+// Định nghĩa kiểu dữ liệu cho kết quả tìm kiếm chuyến tàu
+export interface TripSearchResult {
+  tripId: number;
+  tripCode: string;
+  departureTime: string;
+  arrivalTime: string;
+  routeName: string;
+  trainNumber: string;
+  trainType: string;
+  originStation: string;
+  destinationStation: string;
+  duration: string;
+  minPrice: number;  
+  maxPrice: number;
+  amenities: string;
+}
+
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+  data: TripSearchResult[];
+}
+
+// Định nghĩa kiểu dữ liệu cho thông tin chuyến đi đã chọn
 export interface SelectedTrip {
   operator: string;
   departureTime: string;
@@ -121,26 +162,19 @@ export interface BookingSearchProps {
   
   // Định nghĩa kiểu dữ liệu cho một ga (station)
   export interface Station {
+    id : number; // ID của ga, ví dụ: 1
     value: string; // Giá trị của ga, ví dụ: "hanoi"
     label: string; // Tên hiển thị của ga, ví dụ: "Hà Nội"
   }
 
   
-export interface TrainRoute {
-    departure: string; // Điểm đi, ví dụ: "Sài Gòn"
-    arrival: string; // Điểm đến, ví dụ: "Nha Trang"
-    duration: string; // Thời gian di chuyển, ví dụ: "8h20p"
-    trainNumber: string; // Mã tàu, ví dụ: "SNT2"
-    price: number; // Giá vé, ví dụ: 385000
-  }
   export interface FormData {
-    ticketCollector: any;
-    passenger: any;
-    departure: { value: string; label: string } | null; // Điểm đi, ví dụ: { value: "hanoi", label: "Hà Nội" }
-    destination: { value: string; label: string } | null; // Điểm đến, ví dụ: { value: "danang", label: "Đà Nẵng" }
+  
+    passengers: any;
+    departure: Station  | null; // Điểm đi, ví dụ: { value: "hanoi", label: "Hà Nội" }
+    destination: Station | null; // Điểm đến, ví dụ: { value: "danang", label: "Đà Nẵng" }
     departureDate: Date; // Ngày đi
     returnDate: Date | null; // Ngày về (null nếu không phải khứ hồi)
-    passengers: string; // Số hành khách, ví dụ: "1"
     roundTrip: boolean; // Có phải chuyến khứ hồi không
   }
 

@@ -4,13 +4,17 @@ import DatePicker from 'react-datepicker'; // Thư viện chọn ngày
 import 'react-datepicker/dist/react-datepicker.css';
 import Select from 'react-select'; // Thư viện dropdown với gợi ý
 import { provinces } from '../Data.js/provinces'; // Danh sách các ga
-import { FormData} from '../Entity/Entity'; // Định nghĩa kiểu dữ liệu cho form
-import {  
-FaTrain,
+import { ApiResponse, FormData } from '../Entity/Entity'; // Định nghĩa kiểu dữ liệu cho form
+import {
+  FaTrain,
   FaExchangeAlt,
   FaCalendarAlt,
   FaUser,
 } from 'react-icons/fa';
+import axios from 'axios';
+import SearchService from '../Service/SearchTrip';
+import { Console } from 'console';
+
 
 // Ép kiểu các icon từ Fa* thành React component
 const IconTrain = FaTrain as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -22,11 +26,11 @@ const IconPassenger = FaUser as unknown as React.FC<React.SVGProps<SVGSVGElement
 
 // Định nghĩa kiểu dữ liệu cho lỗi của form
 interface FormErrors {
-  departure?: string; // Lỗi điểm đi
-  destination?: string; // Lỗi điểm đến
-  passengers?: string; // Lỗi số hành khách
+  api?: string;  // api nên là optional và kiểu string
+  departure?: string;
+  destination?: string;
+  passengers?: string;
 }
-
 const TrainBookingForm = () => {
   const navigate = useNavigate(); // Hook để điều hướng sau khi submit
 
@@ -38,8 +42,7 @@ const TrainBookingForm = () => {
     returnDate: null, // Ngày về mặc định là null
     passengers: '1', // Số hành khách mặc định là 1
     roundTrip: false, // Mặc định không phải chuyến khứ hồi
-    ticketCollector: '', // Thêm trường ticketCollector mặc định rỗng
-    passenger: '', // Thêm trường passenger mặc định rỗng
+
   });
 
   // Quản lý lỗi của form
@@ -56,7 +59,7 @@ const TrainBookingForm = () => {
 
   // Kiểm tra dữ liệu form trước khi submit
   const validateForm = () => {
-    const newErrors: FormErrors = {};
+    const newErrors: FormErrors = { api: undefined };
     if (!formData.departure) {
       newErrors.departure = 'Vui lòng chọn điểm đi'; // Báo lỗi nếu chưa chọn điểm đi
     }
@@ -69,8 +72,15 @@ const TrainBookingForm = () => {
     if (parseInt(formData.passengers) > 10) {
       newErrors.passengers = 'Số hành khách tối đa là 10'; // Báo lỗi nếu số hành khách vượt quá 10
     }
+    if (formData.departure?.value === formData.destination?.value) {
+      newErrors.destination = 'Điểm đến không được trùng với điểm đi';
+    }
+    if (formData.roundTrip && formData.returnDate && formData.returnDate < formData.departureDate) {
+      newErrors.api = 'Ngày về phải sau ngày đi';
+    }
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Trả về true nếu không có lỗi
+    return Object.keys(newErrors).length === 1 && !newErrors.api; // Trả về true nếu không có lỗi
   };
 
   // Xử lý khi người dùng thay đổi số hành khách
@@ -84,31 +94,50 @@ const TrainBookingForm = () => {
   };
 
   // Xử lý khi người dùng nhấn nút "Tìm kiếm"
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (validateForm()) {
-      // Tạo query parameters từ dữ liệu form
-      const params = new URLSearchParams({
-        from: formData.departure?.value || '',
-        to: formData.destination?.value || '',
-        departureDate: formData.departureDate.toISOString(),
-        returnDate: formData.returnDate ? formData.returnDate.toISOString() : '',
-        passengers: formData.passengers,
-        roundTrip: formData.roundTrip.toString(),
-      });
-      console.log('Form submitted:', formData); // Log dữ liệu form
+      try {
+        console.log('Submitting form with data:', formData.departure, formData.destination, formData.departureDate, formData.returnDate, formData.passengers, formData.roundTrip);
+        const searchParams = {
+          departure: formData.departure?.id ?? 0,
+          destination: formData.destination?.id ?? 0,
+          departureDate: formData.departureDate.toISOString().split('T')[0],
+          passengers: parseInt(formData.passengers),
+          ...(formData.roundTrip && formData.returnDate && {
+            returnDate: formData.returnDate.toISOString().split('T')[0]
+          })
+        };
 
-      // Điều hướng đến trang kết quả tìm kiếm với query parameters và state
-      navigate('/train-search-results' + '?' + params.toString(), {
-        state: {
-          from: formData.departure?.value,
-          to: formData.destination?.value,
-          departureDate: formData.departureDate,
-          returnDate: formData.returnDate,
-          passengers: formData.passengers,
-          roundTrip: formData.roundTrip,
-        },
-      });
+        const response = await SearchService.searchTrips(searchParams);
+
+        if (response.success) {
+          navigate('/train-search-results', {
+            state: {
+              searchParams: {
+                from: formData.departure?.id ,
+                to: formData.destination?.id,
+                departureDate: formData.departureDate,
+                returnDate: formData.returnDate,
+                passengers: formData.passengers,
+                roundTrip: formData.roundTrip
+              },
+              searchResults: response.data
+            }
+          });
+        } else {
+          setErrors(prev => ({
+            ...prev,
+            api: response.message || 'Có lỗi xảy ra'
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        setErrors(prev => ({
+          ...prev,
+          api: error instanceof Error ? error.message : 'Có lỗi xảy ra khi tìm kiếm'
+        }));
+      }
     }
   };
 
@@ -279,11 +308,10 @@ const TrainBookingForm = () => {
                     onChange={handlePassengerChange}
                     min="1"
                     max="10"
-                    className={`w-full p-3 pr-10 border rounded-lg focus:outline-none focus:ring-2 transition duration-300 bg-white hover:border-yellow-500 ${
-                      errors.passengers
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-yellow-500'
-                    }`}
+                    className={`w-full p-3 pr-10 border rounded-lg focus:outline-none focus:ring-2 transition duration-300 bg-white hover:border-yellow-500 ${errors.passengers
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-yellow-500'
+                      }`}
                   />
                   <IconPassenger className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 </div>
@@ -320,6 +348,13 @@ const TrainBookingForm = () => {
               />
               <label htmlFor="roundtrip" className="text-white font-medium">Khứ Hồi</label>
             </div>
+
+            {/* Hiển thị lỗi từ API (nếu có) */}
+            {errors.api && (
+              <div className="text-red-500 bg-red-100 p-3 rounded mt-4">
+                {errors.api}
+              </div>
+            )}
           </div>
         </div>
       </div>

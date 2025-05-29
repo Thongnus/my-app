@@ -3,16 +3,15 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { useNavigate } from 'react-router-dom';
 import fetchPromotions from '../Service/NewFeedService';
 import { NewfeedDto } from '../Entity/Entity';
-
-// Tùy chọn: Import file CSS nếu tạo riêng
-// import './Newfeed.css';
 
 const Newfeed: React.FC = () => {
   const [promotions, setPromotions] = useState<NewfeedDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadPromotions = async () => {
@@ -41,6 +40,10 @@ const Newfeed: React.FC = () => {
     return <div className="container mx-auto px-4 py-8 text-center text-gray-600">Không có khuyến mãi nào.</div>;
   }
 
+  const handleCardClick = (promo: NewfeedDto) => {
+    navigate(`/detail-new-feed/${promo.id}`, { state: { promo } }); // Truyền dữ liệu qua state
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       <h2 className="text-3xl font-bold mb-4 text-gray-800">Transport Operators' Offers & News</h2>
@@ -62,7 +65,7 @@ const Newfeed: React.FC = () => {
         loop={true}
       >
         {promotions.map((promo) => (
-          <SwiperSlide key={promo.id} className="h-full">
+          <SwiperSlide key={promo.id} className="h-full cursor-pointer" onClick={() => handleCardClick(promo)}>
             <div className="bg-white rounded-xl shadow-lg p-5 flex flex-col justify-between h-full min-h-[350px] transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <img
                 src={promo.image}
