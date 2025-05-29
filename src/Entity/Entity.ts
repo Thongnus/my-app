@@ -15,6 +15,14 @@ export interface TripDetails {
     name?: string;
     confirmPassword?: string;
 }
+export interface NewfeedDto {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface SelectedTrip {
   operator: string;
   departureTime: string;
